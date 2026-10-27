@@ -1,17 +1,25 @@
-import SwiftUI
-import Playgrounds
+//
+//  ContentView.swift
+//  FilterView
+//
+//  Created by Stuart Rankin on 10/27/26.
+//
 
-struct ContentView: View {
-    var body: some View {
-        Text("Hello, world!")
-            .padding()
+import SwiftUI
+
+struct ContentView: View
+{
+    @State var Server: FilterServer? = FilterServer()
+    
+    var body: some View
+    {
+        MainUI(Filters: $Server)
+            .frame(minWidth: 320, minHeight: 400)
     }
 }
 
-#Preview {
+#Preview
+{
     ContentView()
 }
 
-#Playground {
-    _ = 1 + 2
-}
