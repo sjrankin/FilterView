@@ -9,23 +9,61 @@ import SwiftUI
 
 struct FilterView: View
 {
-    @State var SampleImage: Image
-    @State var FilterName: String
-    
+    @State var DisplayImage: Image
+    var Server: FilterServer? = nil
+    var Filter: String? = nil
+    @State private var FilteredImage: Image? = nil
+    let IsSelected: Bool
+
     var body: some View
     {
         VStack
         {
-            SampleImage
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
-                .foregroundStyle(.white)
+            if let ProcessedImage = FilteredImage
+            {
+                ProcessedImage
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 80, height: 80)
+                    .foregroundStyle(.white)
+            }
+            else
+            {
+                Image("ProcessError")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 80, height: 80)
+                    .foregroundStyle(.white)
+            }
             HStack
             {
                 Spacer()
-                Text(FilterName)
+                Text(Filter ?? "Generic")
                 Spacer()
+            }
+        }
+        .help("\(Filter ?? "Generic") filter to apply to the image.")
+        .frame(maxWidth: 100)
+        .background(IsSelected ? Color.yellow : Color.clear, in: .rect(cornerRadius: 8))
+        .task(id: Filter)
+        {
+            guard let Filter = Filter else
+            {
+                FilteredImage = nil
+                return
+            }
+            do
+            {
+                let Result = try await DisplayImage.Filtered(Filter: Filter,
+                                                             Server: Server)
+                if !Task.isCancelled
+                {
+                    FilteredImage = Result
+                }
+            }
+            catch
+            {
+                FilteredImage = nil
             }
         }
     }
@@ -33,6 +71,10 @@ struct FilterView: View
 
 #Preview
 {
-    let sample = Image(systemName: "camera.macro")
-    FilterView(SampleImage: sample, FilterName: "Mesh")
+    let Source = Image("Hana")
+    let FilterName = CILineScreen.FilterName
+    FilterView(DisplayImage: Source,
+               Server: FilterServer(),
+               Filter: FilterName,
+               IsSelected: false)
 }

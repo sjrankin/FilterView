@@ -104,4 +104,14 @@ class ImageUtility
         let Renderer = ImageRenderer(content: su)
         return Renderer.cgImage
     }
+    
+    /// Returns the center point of the passed `CGImage`.
+    /// - Parameter cg: The image whose center will be returned.
+    /// - Returns: The point at the center of the passed image.
+    static func CGImageCenter(_ cg: CGImage) -> CGPoint
+    {
+        let CenterX = Double(cg.width) / 2.0
+        let CenterY = Double(cg.height) / 2.0
+        return CGPoint(x: CenterX, y: CenterY)
+    }
 }

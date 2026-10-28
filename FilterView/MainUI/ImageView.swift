@@ -11,6 +11,7 @@ struct ImageView: View
 {
     @State var DisplayImage: Image
     var Server: FilterServer? = nil
+    var Filter: String? = nil
     @State private var FilteredImage: Image?
 
     var body: some View
@@ -24,12 +25,21 @@ struct ImageView: View
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black, ignoresSafeAreaEdges: [])
-        .task
+        .task(id: Filter)
         {
+            guard let Filter = Filter else
+            {
+                FilteredImage = nil
+                return
+            }
             do
             {
-                FilteredImage = try await DisplayImage.Filtered(Filter: CIDither.FilterName,
-                                                                Server: Server)
+                let Result = try await DisplayImage.Filtered(Filter: Filter,
+                                                             Server: Server)
+                if !Task.isCancelled
+                {
+                    FilteredImage = Result
+                }
             }
             catch
             {

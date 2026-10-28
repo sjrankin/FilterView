@@ -14,15 +14,39 @@ class FilterServer
     /// Holds the dictionary of image filters.
      var BuiltInFilters = [String: ImageFilter]()
 
+    /// Filter names in the order they were registered. Dictionaries have no stable order, so this is what makes
+    /// `GetFilterList` return the same order every time.
+    private var FilterOrder = [String]()
+
     /// Initilize the filter. Filters are added to `BuildInFilters` here.
     init()
     {
-        BuiltInFilters[PassThroughFilter.FilterName] = PassThroughFilter()
-        BuiltInFilters[CIGrayscale.FilterName] = CIGrayscale()
-        BuiltInFilters[CINoir.FilterName] = CINoir()
-        BuiltInFilters[CIDither.FilterName] = CIDither()
-        BuiltInFilters[CIMaxComponent.FilterName] = CIMaxComponent()
-        BuiltInFilters[CIMinComponent.FilterName] = CIMinComponent()
+        Register(PassThroughFilter.FilterName, PassThroughFilter())
+        Register(CIGrayscale.FilterName, CIGrayscale())
+        Register(CINoir.FilterName, CINoir())
+        Register(CIDither.FilterName, CIDither())
+        Register(CIMaxComponent.FilterName, CIMaxComponent())
+        Register(CIMinComponent.FilterName, CIMinComponent())
+        Register(CICMYKHalftone.FilterName, CICMYKHalftone())
+        Register(CIDotScreen.FilterName, CIDotScreen())
+        Register(CIHatchedScreen.FilterName, CIHatchedScreen())
+        Register(CILineScreen.FilterName, CILineScreen())
+        Register(CICircularScreen.FilterName, CICircularScreen())
+        Register(CILineOverlay.FilterName, CILineOverlay())
+        Register(CIComicEffect.FilterName, CIComicEffect())
+        Register(MetalInvert.FilterName, MetalInvert())
+    }
+
+    /// Adds a filter, remembering the order in which it was added.
+    /// - Parameter Name: The name of the filter.
+    /// - Parameter Filter: The filter.
+    private func Register(_ Name: String, _ Filter: ImageFilter)
+    {
+        if BuiltInFilters[Name] == nil
+        {
+            FilterOrder.append(Name)
+        }
+        BuiltInFilters[Name] = Filter
     }
     
     /// Given a filter ID, return the filter itself.
@@ -42,14 +66,14 @@ class FilterServer
     {
         if InOrder
         {
-            let Infrastructure = BuiltInFilters.filter{$0.value.FilterType == .Infrastructure}
-            let Metal = BuiltInFilters.filter{$0.value.FilterType == .Metal}
-            let CoreImage = BuiltInFilters.filter{$0.value.FilterType == .CoreImage}
-            return Array(Infrastructure.keys) + Array(Metal.keys) + Array(CoreImage.keys)
+            let Infrastructure = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Infrastructure}
+            let Metal = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Metal}
+            let CoreImage = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .CoreImage}
+            return Infrastructure + Metal + CoreImage
         }
         else
         {
-            return Array(BuiltInFilters.keys)
+            return FilterOrder
         }
     }
     

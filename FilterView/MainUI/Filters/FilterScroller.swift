@@ -10,10 +10,13 @@ import SwiftUI
 struct FilterScroller: View
 {
     @State var Server: FilterServer?
-    
+    @Binding var Selected: String?
+    @State var SourceImage: Image? = nil
+
     var body: some View
     {
-        if let Server = Server
+        if let Server = Server,
+           let Source = SourceImage
         {
             if Server.BuiltInFilters.count > 0
             {
@@ -24,7 +27,18 @@ struct FilterScroller: View
                         ForEach(Server.GetFilterList(), id: \.self)
                         {
                             FilterName in
-                            FilterView(SampleImage: Image(systemName: "camera"), FilterName: FilterName)
+                            Button
+                            {
+                                Selected = FilterName
+                            }
+                            label:
+                            {
+                                FilterView(DisplayImage: Source,
+                                           Server: Server,
+                                           Filter: FilterName,
+                                           IsSelected: Selected == FilterName)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -42,6 +56,7 @@ struct FilterScroller: View
 
 #Preview
 {
-    FilterScroller(Server: FilterServer())
+    @Previewable @State var Selected: String? = nil
+    FilterScroller(Server: FilterServer(), Selected: $Selected)
         .frame(width: 300, height: 150)
 }
