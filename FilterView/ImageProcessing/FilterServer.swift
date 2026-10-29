@@ -38,6 +38,7 @@ class FilterServer
         Register(ConditionalMetalInvert.FilterName, ConditionalMetalInvert())
         Register(MetalBrightnessInvert.FilterName, MetalBrightnessInvert())
         Register(ColorBrightnessInvert.FilterName, ColorBrightnessInvert())
+        Register(ChannelSwap.FilterName, ChannelSwap())
     }
 
     /// Adds a filter, remembering the order in which it was added.

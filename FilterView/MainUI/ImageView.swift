@@ -40,6 +40,11 @@ struct ImageView: View
                     Parameters = [String: Any]()
                     Parameters![Channels.RedBlue.rawValue] = 0
                 }
+                if Filter == ChannelSwap.FilterName
+                {
+                    Parameters = [String: Any]()
+                    Parameters![SwapChannels.RedBlue.rawValue] = 0
+                }
                 let Result = try await DisplayImage.Filtered(Filter: Filter,
                                                              Server: Server,
                                                              Options: Parameters)
