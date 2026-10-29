@@ -8,7 +8,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-// Simpler color inversion.
+// Simple color inversion.
 kernel void InvertColor(texture2d<float, access::read> Input [[texture(0)]],
                         texture2d<float, access::write> Output [[texture(1)]],
                         uint2 Position [[thread_position_in_grid]])

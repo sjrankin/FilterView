@@ -17,7 +17,7 @@ class PassThroughFilter: ImageFilter
         .Infrastructure
     }
     
-    func ProcessImage(_ Input: CGImage) async throws -> CGImage
+    func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
         try Task.checkCancellation()
         return Input

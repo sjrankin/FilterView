@@ -54,8 +54,15 @@ struct FilterView: View
             }
             do
             {
+                var Parameters: [String: Any]? = nil
+                if Filter == ConditionalMetalInvert.FilterName
+                {
+                    Parameters = [String: Any]()
+                    Parameters![Channels.RedBlue.rawValue] = 0
+                }
                 let Result = try await DisplayImage.Filtered(Filter: Filter,
-                                                             Server: Server)
+                                                             Server: Server,
+                                                             Options: Parameters)
                 if !Task.isCancelled
                 {
                     FilteredImage = Result

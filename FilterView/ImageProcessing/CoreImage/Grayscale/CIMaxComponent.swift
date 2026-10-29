@@ -19,7 +19,7 @@ class CIMaxComponent: ImageFilter
         .CoreImage
     }
     
-    func ProcessImage(_ Input: CGImage) async throws -> CGImage
+    func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
         try Task.checkCancellation()
         let ci = ImageUtility.CGImageToCIImage(Input)

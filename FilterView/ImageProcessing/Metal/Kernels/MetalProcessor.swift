@@ -10,8 +10,8 @@ import Metal
 import MetalKit
 
 /// Runs any compute kernel from the app's default Metal library on a `CGImage`.
-///
 /// Kernels must use this signature:
+///
 /// - `texture(0)`: the input image, `access::read`.
 /// - `texture(1)`: the output image, `access::write`.
 /// - `thread_position_in_grid`: the pixel being processed.

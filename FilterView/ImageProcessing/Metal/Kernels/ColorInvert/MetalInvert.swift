@@ -18,7 +18,7 @@ struct MetalInvert: ImageFilter
         .Metal
     }
 
-    func ProcessImage(_ Input: CGImage) async throws -> CGImage
+    func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
         return try await MetalProcessor.Shared.Run(Kernel: "InvertColor", On: Input)
     }

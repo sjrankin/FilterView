@@ -35,6 +35,9 @@ class FilterServer
         Register(CILineOverlay.FilterName, CILineOverlay())
         Register(CIComicEffect.FilterName, CIComicEffect())
         Register(MetalInvert.FilterName, MetalInvert())
+        Register(ConditionalMetalInvert.FilterName, ConditionalMetalInvert())
+        Register(MetalBrightnessInvert.FilterName, MetalBrightnessInvert())
+        Register(ColorBrightnessInvert.FilterName, ColorBrightnessInvert())
     }
 
     /// Adds a filter, remembering the order in which it was added.
@@ -78,18 +81,21 @@ class FilterServer
     }
     
     /// Run the filter whose name is in `Filter` on the passed image.
+    ///
     /// - Parameter Filter: The name of the filter to run. Must match the value stored in `FilterName` in each filter.
     /// - Parameter With: The image to process.
+    /// - Parameter Options: Dictionary with context-sensitive keys to supply options to filters. Keys are defined in the actual filter so
+    /// please refer to the source for what is expected.
     /// - Returns: On success, returns a new `CGImage`.
     /// - Throws: FilterException on filter errors (if `Filter` cannot be found, for example).
     /// - Note: Called asynchronously.
     /// - Note: Can be cancelled if the processing gets stuck.
-    func Run(Filter: String, With Source: CGImage) async throws -> CGImage
+    func Run(Filter: String, With Source: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
         guard let Found = GetFilter(Filter) else
         {
             throw FilterException(Message: "Cannot find \(Filter)")
         }
-        return try await Found.ProcessImage(Source)
+        return try await Found.ProcessImage(Source, Options)
     }
 }
