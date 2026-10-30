@@ -21,10 +21,13 @@ actor MetalProcessor
     /// Shared instance. Device, queue, library, and compiled kernels are created once and reused.
     static let Shared = MetalProcessor()
 
-    private let Device: MTLDevice?
-    private let Queue: MTLCommandQueue?
+    /// Internal (not private) so `MetalProcessor+MPS.swift` can use it.
+    let Device: MTLDevice?
+    /// Internal (not private) so `MetalProcessor+MPS.swift` can use it.
+    let Queue: MTLCommandQueue?
     private let Library: MTLLibrary?
-    private let Loader: MTKTextureLoader?
+    /// Internal (not private) so `MetalProcessor+MPS.swift` can use it.
+    let Loader: MTKTextureLoader?
     private var Pipelines = [String: MTLComputePipelineState]()
 
     init()
@@ -134,20 +137,26 @@ actor MetalProcessor
         return try MakeImage(From: Destination)
     }
 
-    /// Copies the pixels of an `rgba8Unorm` texture into a `CGImage`.
+    /// Copies the pixels of an `rgba8Unorm` or `bgra8Unorm` texture into a `CGImage`.
     /// - Parameter Texture: The texture to read.
+    /// - Parameter Level: Mip level to read. The image is the size of that level.
+    /// - Parameter Opaque: If true, the alpha channel is ignored and the image is fully opaque.
     /// - Returns: The converted image.
     /// - Throws: `FilterException` if the image cannot be created.
-    private func MakeImage(From Texture: MTLTexture) throws -> CGImage
+    func MakeImage(From Texture: MTLTexture, Level: Int = 0, Opaque: Bool = false) throws -> CGImage
     {
-        let Width = Texture.width
-        let Height = Texture.height
+        let Width = max(Texture.width >> Level, 1)
+        let Height = max(Texture.height >> Level, 1)
         let BytesPerRow = Width * 4
         var Pixels = [UInt8](repeating: 0, count: BytesPerRow * Height)
         Texture.getBytes(&Pixels,
                          bytesPerRow: BytesPerRow,
                          from: MTLRegionMake2D(0, 0, Width, Height),
-                         mipmapLevel: 0)
+                         mipmapLevel: Level)
+        // Textures from `MTKTextureLoader` are usually BGRA, which CoreGraphics reads as little-endian alpha-first.
+        let IsBGRA = Texture.pixelFormat == .bgra8Unorm
+        let Alpha: CGImageAlphaInfo = Opaque ? (IsBGRA ? .noneSkipFirst : .noneSkipLast) : (IsBGRA ? .premultipliedFirst : .premultipliedLast)
+        let Info = CGBitmapInfo(rawValue: Alpha.rawValue | (IsBGRA ? CGBitmapInfo.byteOrder32Little.rawValue : 0))
         guard let Provider = CGDataProvider(data: Data(Pixels) as CFData),
               let Result = CGImage(width: Width,
                                    height: Height,
@@ -155,7 +164,7 @@ actor MetalProcessor
                                    bitsPerPixel: 32,
                                    bytesPerRow: BytesPerRow,
                                    space: CGColorSpaceCreateDeviceRGB(),
-                                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                                   bitmapInfo: Info,
                                    provider: Provider,
                                    decode: nil,
                                    shouldInterpolate: false,

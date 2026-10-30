@@ -45,6 +45,48 @@
                 { "Name": "Mirror Left", "Filter": "Mirror", "Options": { "LEFTLEFT": "" } },
                 { "Name": "Mirror Right", "Filter": "Mirror", "Options": { "RIGHTRIGHT": "" } }
             ]
+        },
+        {
+          "Name": "Stylize",
+          "Children": [
+            { "Name": "Kuwahara Radius 2", "Filter": "Metal Kuwahara", "Options": { "RADIUS2": "" } },
+            { "Name": "Kuwahara Radius 4", "Filter": "Metal Kuwahara", "Options": { "RADIUS4": "" } },
+            { "Name": "Kuwahara Radius 6", "Filter": "Metal Kuwahara", "Options": { "RADIUS6": "" } },
+            { "Name": "Kuwahara Radius 8", "Filter": "Metal Kuwahara", "Options": { "RADIUS8": "" } }
+          ]
+        },
+        {
+          "Name": "Edges",
+          "Children": [
+            { "Name": "Sobel", "Filter": "MPS Sobel" },
+            { "Name": "Laplacian", "Filter": "MPS Laplacian" }
+          ]
+        },
+        {
+          "Name": "Contrast",
+          "Children": [
+            { "Name": "Histogram Equalization", "Filter": "MPS Histogram Equalization" }
+          ]
+        },
+        {
+          "Name": "Morphology",
+          "Children": [
+            { "Name": "Erode 3x3", "Filter": "MPS Erode", "Options": { "SIZE3": "" } },
+            { "Name": "Erode 5x5", "Filter": "MPS Erode", "Options": { "SIZE5": "" } },
+            { "Name": "Erode 7x7", "Filter": "MPS Erode", "Options": { "SIZE7": "" } },
+            { "Name": "Dilate 3x3", "Filter": "MPS Dilate", "Options": { "SIZE3": "" } },
+            { "Name": "Dilate 5x5", "Filter": "MPS Dilate", "Options": { "SIZE5": "" } },
+            { "Name": "Dilate 7x7", "Filter": "MPS Dilate", "Options": { "SIZE7": "" } }
+          ]
+        },
+        {
+          "Name": "Pyramid",
+          "Children": [
+            { "Name": "Level 1 (1/2)", "Filter": "MPS Pyramid", "Options": { "LEVEL1": "" } },
+            { "Name": "Level 2 (1/4)", "Filter": "MPS Pyramid", "Options": { "LEVEL2": "" } },
+            { "Name": "Level 3 (1/8)", "Filter": "MPS Pyramid", "Options": { "LEVEL3": "" } },
+            { "Name": "Level 4 (1/16)", "Filter": "MPS Pyramid", "Options": { "LEVEL4": "" } }
+          ]
         }
       ]
     },

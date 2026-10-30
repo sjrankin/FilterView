@@ -19,6 +19,7 @@ struct MainUI: View
     @State var IsDropTargeted = false
     @State var ShowExporter = false
     @State private var ExportDocument = ImageUtility.PNGImage(Data: Data())
+    @State private var ShowImporter = false
     
     var body: some View
     {
@@ -72,7 +73,19 @@ struct MainUI: View
                     {
                         Button("Load")
                         {
-                            print("Load from OS")
+                            ShowImporter = true
+                        }
+                        .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image])
+                        {
+                            Result in
+                            switch Result
+                            {
+                                case .success(let Selected):
+                                    ImportLoadedImage(Selected)
+                                    
+                                case .failure(let Failure):
+                                    print("Load failed: \(Failure)")
+                            }
                         }
                     }
                     Button("Save")
@@ -105,6 +118,24 @@ struct MainUI: View
         }
     }
 
+    private func ImportLoadedImage(_ NewImage: URL)
+    {
+        let Scope = NewImage.startAccessingSecurityScopedResource()
+        defer
+        {
+            if Scope
+            {
+                NewImage.stopAccessingSecurityScopedResource()
+            }
+        }
+        guard let Loaded = ImageUtility.LoadImage(from: NewImage) else
+        {
+            return
+        }
+        SourceImage = ImageUtility.CGImageToImage(Loaded)
+        SourceID = UUID()
+    }
+    
     /// Applies the selected filter (if any) to the image, encodes it as PNG, and shows the save dialog.
     private func PrepareExport() async
     {

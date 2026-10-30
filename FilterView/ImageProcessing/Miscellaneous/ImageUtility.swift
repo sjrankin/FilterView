@@ -156,18 +156,27 @@ class ImageUtility
     }
 }
 
-#if os(macOS)
-import ImageIO
-
 extension ImageUtility
 {
+    /// Longest side, in pixels, of an image loaded by `LoadImage`. Larger images are scaled down so they do not slow the filters.
+    static let MaxLoadedPixelSize = 4096
+
+    /// Loads an image file. Works on iOS and macOS.
+    /// - Parameter URL: The image file.
+    /// - Returns: The image with its EXIF orientation applied (so iPhone photos are not rotated), scaled down if its longest
+    /// side is over `MaxLoadedPixelSize`. `nil` if the file cannot be read as an image.
     static func LoadImage(from URL: URL) -> CGImage?
     {
         guard let Source = CGImageSourceCreateWithURL(URL as CFURL, nil) else
         {
             return nil
         }
-        return CGImageSourceCreateImageAtIndex(Source, 0, nil)
+        let Options: [CFString: Any] =
+        [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: MaxLoadedPixelSize
+        ]
+        return CGImageSourceCreateThumbnailAtIndex(Source, 0, Options as CFDictionary)
     }
 }
-#endif
