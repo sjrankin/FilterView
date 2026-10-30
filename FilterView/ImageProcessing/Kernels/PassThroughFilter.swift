@@ -8,6 +8,7 @@
 import Foundation
 import CoreGraphics
 
+/// Pass-through filter that performs no processing and just returns the source image.
 class PassThroughFilter: ImageFilter
 {
     static let FilterName = "Passthrough"

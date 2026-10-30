@@ -38,6 +38,9 @@ struct ImageView: View
                 FilteredImage = nil
                 return
             }
+            #if DEBUG
+            let StartTime = ContinuousClock.now
+            #endif
             do
             {
                 let Result = try await DisplayImage.Filtered(Filter: Selection.Filter,
@@ -47,11 +50,17 @@ struct ImageView: View
                 {
                     FilteredImage = Result
                     FilteredFor = Current
+                    #if DEBUG
+                    print("Filter \(Selection.Filter): \(ContinuousClock.now - StartTime) from call to display")
+                    #endif
                 }
             }
             catch
             {
                 FilteredImage = nil
+                #if DEBUG
+                print("Filter \(Selection.Filter): failed after \(ContinuousClock.now - StartTime) (\(error))")
+                #endif
             }
         }
     }
