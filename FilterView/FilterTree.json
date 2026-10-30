@@ -49,6 +49,17 @@
       ]
     },
     {
+        "Name": "CPU",
+        "Children": [
+            {
+                "Name": "Monochrome",
+                "Children": [
+                    { "Name": "Atkinson Dither", "Filter": "Atkinson Dither" }
+                ]
+            }
+            ]
+    },
+    {
       "Name": "Core Image",
       "Children": [
         {

@@ -2,7 +2,7 @@
 //  MetalProcessor.swift
 //  FilterView
 //
-//  Created by Stuart Rankin on 10/28/26.
+//  Created by Claude/Stuart Rankin on 10/28/26.
 //
 
 import Foundation
@@ -29,14 +29,14 @@ actor MetalProcessor
 
     init()
     {
-        let Gpu = MTLCreateSystemDefaultDevice()
-        Device = Gpu
-        Queue = Gpu?.makeCommandQueue()
-        Library = Gpu?.makeDefaultLibrary()
-        Loader = Gpu.map{MTKTextureLoader(device: $0)}
+        let GPU = MTLCreateSystemDefaultDevice()
+        Device = GPU
+        Queue = GPU?.makeCommandQueue()
+        Library = GPU?.makeDefaultLibrary()
+        Loader = GPU.map{MTKTextureLoader(device: $0)}
     }
 
-    /// Returns the compiled pipeline for a kernel, compiling and caching it on first use.
+    /// Returns the compiled pipeline (from `Run`) for a kernel, compiling and caching it on first use.
     /// - Parameter Kernel: Name of the kernel function in the default library.
     /// - Returns: The pipeline state for the kernel.
     /// - Throws: `FilterException` if Metal is unavailable or the kernel does not exist.
@@ -66,6 +66,7 @@ actor MetalProcessor
     /// - Parameter Parameters: Values passed to the kernel at `buffer(0)`. Pass nothing if the kernel takes none.
     /// - Returns: The processed image, the same size as `Input`.
     /// - Throws: `FilterException` if Metal is unavailable, the kernel does not exist, or the image cannot be converted.
+    /// - Note: Currently no kernels take any parameters but in the future, some will.
     func Run(Kernel: String, On Input: CGImage, Parameters: [Float] = []) async throws -> CGImage
     {
         let State = try Pipeline(For: Kernel)
@@ -76,6 +77,7 @@ actor MetalProcessor
             throw FilterException(Message: "Metal is not available")
         }
 
+        // Create a texture from the image.
         let Source = try await Loader.newTexture(cgImage: Input, options: [.SRGB: false])
         let Width = Source.width
         let Height = Source.height
@@ -85,6 +87,7 @@ actor MetalProcessor
                                                                   height: Height,
                                                                   mipmapped: false)
         Descriptor.usage = [.shaderRead, .shaderWrite]
+        // Create the destination buffer for the results.
         guard let Destination = Device.makeTexture(descriptor: Descriptor),
               let Buffer = Queue.makeCommandBuffer(),
               let Encoder = Buffer.makeComputeCommandEncoder() else
@@ -92,36 +95,48 @@ actor MetalProcessor
             throw FilterException(Message: "Metal setup failed")
         }
 
+        // Create the compute pipeline.
+        // Add the pipeline state - set the kernel to run.
         Encoder.setComputePipelineState(State)
+        // Set the source image. It will not be changed.
         Encoder.setTexture(Source, index: 0)
+        // Set the destination. It will be changed.
         Encoder.setTexture(Destination, index: 1)
         if !Parameters.isEmpty
         {
+            // Save parameters as Floats. The parameters are context sensitive for each kernel.
             Encoder.setBytes(Parameters, length: MemoryLayout<Float>.stride * Parameters.count, index: 0)
         }
+        // Calculate the thread count.
         let GroupWidth = State.threadExecutionWidth
         let GroupHeight = State.maxTotalThreadsPerThreadgroup / GroupWidth
+        // Set the number of threads.
         Encoder.dispatchThreads(MTLSize(width: Width, height: Height, depth: 1),
                                 threadsPerThreadgroup: MTLSize(width: GroupWidth, height: GroupHeight, depth: 1))
+        // Mark the end of encoder data.
         Encoder.endEncoding()
 
         await withCheckedContinuation
         {
             Continuation in
+            // Set the completion handler for the command buffer.
             Buffer.addCompletedHandler
             {
                 _ in
                 Continuation.resume()
             }
+            
+            // Run the kernel on the GPU.
             Buffer.commit()
         }
 
+        // Return the resultant image. Throws an exception on error.
         return try MakeImage(From: Destination)
     }
 
     /// Copies the pixels of an `rgba8Unorm` texture into a `CGImage`.
     /// - Parameter Texture: The texture to read.
-    /// - Returns: The image.
+    /// - Returns: The converted image.
     /// - Throws: `FilterException` if the image cannot be created.
     private func MakeImage(From Texture: MTLTexture) throws -> CGImage
     {

@@ -27,4 +27,6 @@ enum ImageFilterTypes
     case Metal
     /// Infrastructure filter - not really intended to be used for directly image processing.
     case Infrastructure
+    /// Filters implemented on the CPU because there is no CoreImage filter and the given filter is not really good on a GPU.
+    case CPU
 }

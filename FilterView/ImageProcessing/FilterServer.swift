@@ -25,6 +25,7 @@ class FilterServer
         Register(CIGrayscale.FilterName, CIGrayscale())
         Register(CINoir.FilterName, CINoir())
         Register(CIDither.FilterName, CIDither())
+        Register(AtkinsonDither.FilterName, AtkinsonDither())
         Register(CIMaxComponent.FilterName, CIMaxComponent())
         Register(CIMinComponent.FilterName, CIMinComponent())
         Register(CICMYKHalftone.FilterName, CICMYKHalftone())
@@ -46,6 +47,7 @@ class FilterServer
         Register(CISixFoldReflectedTile.FilterName, CISixFoldReflectedTile())
         Register(CIEightFoldReflectedTile.FilterName, CIEightFoldReflectedTile())
         Register(CITwelveFoldReflectedTile.FilterName, CITwelveFoldReflectedTile())
+        Register(AtkinsonDither.FilterName, AtkinsonDither())
     }
 
     /// Adds a filter, remembering the order in which it was added.
@@ -80,7 +82,8 @@ class FilterServer
             let Infrastructure = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Infrastructure}
             let Metal = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Metal}
             let CoreImage = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .CoreImage}
-            return Infrastructure + Metal + CoreImage
+            let CPU = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .CPU}
+            return Infrastructure + Metal + CoreImage + CPU
         }
         else
         {
