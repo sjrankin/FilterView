@@ -39,6 +39,13 @@ class FilterServer
         Register(MetalBrightnessInvert.FilterName, MetalBrightnessInvert())
         Register(ColorBrightnessInvert.FilterName, ColorBrightnessInvert())
         Register(ChannelSwap.FilterName, ChannelSwap())
+        Register(MirrorImage.FilterName, MirrorImage())
+        Register(CIKaleidoscope.FilterName, CIKaleidoscope())
+        Register(CITriangleFoldReflectedTile.FilterName, CITriangleFoldReflectedTile())
+        Register(CIFourFoldReflectedTile.FilterName, CIFourFoldReflectedTile())
+        Register(CISixFoldReflectedTile.FilterName, CISixFoldReflectedTile())
+        Register(CIEightFoldReflectedTile.FilterName, CIEightFoldReflectedTile())
+        Register(CITwelveFoldReflectedTile.FilterName, CITwelveFoldReflectedTile())
     }
 
     /// Adds a filter, remembering the order in which it was added.

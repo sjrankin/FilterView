@@ -13,6 +13,8 @@ import UIKit
 import AppKit
 #endif
 import SwiftUI
+import ImageIO
+import UniformTypeIdentifiers
 
 /// Contains miscellaneous utility functions for images.
 class ImageUtility
@@ -114,4 +116,58 @@ class ImageUtility
         let CenterY = Double(cg.height) / 2.0
         return CGPoint(x: CenterX, y: CenterY)
     }
+    
+    // MARK: - File saving in SwiftUI
+
+    enum ImageEncoder
+    {
+        static func PNGData(_ Source: CGImage) -> Data?
+        {
+            let Mutable = NSMutableData()
+            guard let Destination = CGImageDestinationCreateWithData(Mutable,
+                                                                     UTType.png.identifier as CFString,
+                                                                     1, nil) else
+            {
+                return nil
+            }
+            CGImageDestinationAddImage(Destination, Source, nil)
+            return CGImageDestinationFinalize(Destination) ? Mutable as Data : nil
+        }
+    }
+    
+    struct PNGImage: FileDocument
+    {
+        static var readableContentTypes: [UTType] { [.png] }
+        var Data: Data
+        
+        init(Data: Data)
+        {
+            self.Data = Data
+        }
+        
+        init(configuration: ReadConfiguration) throws{
+            Data = configuration.file.regularFileContents ?? Foundation.Data()
+        }
+        
+        func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper
+        {
+            FileWrapper(regularFileWithContents: Data)
+        }
+    }
 }
+
+#if os(macOS)
+import ImageIO
+
+extension ImageUtility
+{
+    static func LoadImage(from URL: URL) -> CGImage?
+    {
+        guard let Source = CGImageSourceCreateWithURL(URL as CFURL, nil) else
+        {
+            return nil
+        }
+        return CGImageSourceCreateImageAtIndex(Source, 0, nil)
+    }
+}
+#endif

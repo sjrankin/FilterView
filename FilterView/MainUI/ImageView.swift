@@ -9,48 +9,44 @@ import SwiftUI
 
 struct ImageView: View
 {
-    @State var DisplayImage: Image
+    /// The image to filter. A plain property (not `@State`) so a new image from the parent replaces it.
+    var DisplayImage: Image
     var Server: FilterServer? = nil
-    var Filter: String? = nil
+    var Selection: FilterSelection? = nil
+    /// Changes whenever the parent supplies a different image, which restarts the filter task.
+    var SourceID = UUID()
     @State private var FilteredImage: Image?
+    /// The `SourceID` that `FilteredImage` was made from. A result for an older image is never shown.
+    @State private var FilteredFor: UUID?
 
     var body: some View
     {
         VStack
         {
-            (FilteredImage ?? DisplayImage)
+            ((FilteredFor == SourceID ? FilteredImage : nil) ?? DisplayImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(.white)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black, ignoresSafeAreaEdges: [])
-        .task(id: Filter)
+        .task(id: TaskKey(Selection: Selection, SourceID: SourceID))
         {
-            guard let Filter = Filter else
+            let Current = SourceID
+            guard let Selection = Selection else
             {
                 FilteredImage = nil
                 return
             }
             do
             {
-                var Parameters: [String: Any]? = nil
-                if Filter == ConditionalMetalInvert.FilterName
-                {
-                    Parameters = [String: Any]()
-                    Parameters![Channels.RedBlue.rawValue] = 0
-                }
-                if Filter == ChannelSwap.FilterName
-                {
-                    Parameters = [String: Any]()
-                    Parameters![SwapChannels.RedBlue.rawValue] = 0
-                }
-                let Result = try await DisplayImage.Filtered(Filter: Filter,
+                let Result = try await DisplayImage.Filtered(Filter: Selection.Filter,
                                                              Server: Server,
-                                                             Options: Parameters)
+                                                             Options: Selection.Options)
                 if !Task.isCancelled
                 {
                     FilteredImage = Result
+                    FilteredFor = Current
                 }
             }
             catch
@@ -59,6 +55,13 @@ struct ImageView: View
             }
         }
     }
+}
+
+/// Identifies one filtering job: re-run when either the filter or the source image changes.
+private struct TaskKey: Hashable
+{
+    let Selection: FilterSelection?
+    let SourceID: UUID
 }
 
 #Preview

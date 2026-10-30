@@ -1,0 +1,95 @@
+{
+  "Name": "Filters",
+  "Children": [
+    {
+      "Name": "Infrastructure",
+      "Children": [
+        { "Name": "Passthrough", "Filter": "Passthrough" }
+      ]
+    },
+    {
+      "Name": "Metal",
+      "Children": [
+        {
+          "Name": "Invert",
+          "Children": [
+            { "Name": "Invert All", "Filter": "Metal Invert" },
+            { "Name": "Invert Red", "Filter": "Channel Invert", "Options": { "RED": "" } },
+            { "Name": "Invert Green", "Filter": "Channel Invert", "Options": { "GREEN": "" } },
+            { "Name": "Invert Blue", "Filter": "Channel Invert", "Options": { "BLUE": "" } },
+            { "Name": "Invert Red + Green", "Filter": "Channel Invert", "Options": { "REDGREEN": "" } },
+            { "Name": "Invert Red + Blue", "Filter": "Channel Invert", "Options": { "REDBLUE": "" } },
+            { "Name": "Invert Green + Blue", "Filter": "Channel Invert", "Options": { "GREENBLUE": "" } }
+          ]
+        },
+        {
+          "Name": "Brightness",
+          "Children": [
+            { "Name": "Brightness Invert", "Filter": "Metal Bright Invert" },
+            { "Name": "Brightness Invert + Color", "Filter": "Color Bright Invert" }
+          ]
+        },
+        {
+          "Name": "Swap",
+          "Children": [
+            { "Name": "Swap Red + Green", "Filter": "Channel Swap", "Options": { "REDGREEN": "" } },
+            { "Name": "Swap Red + Blue", "Filter": "Channel Swap", "Options": { "REDBLUE": "" } },
+            { "Name": "Swap Green + Blue", "Filter": "Channel Swap", "Options": { "GREENBLUE": "" } }
+          ]
+        },
+        {
+            "Name": "Distortion",
+            "Children": [
+                { "Name": "Mirror Top", "Filter": "Mirror", "Options": { "TOPTOP": "" } },
+                { "Name": "Mirror Bottom", "Filter": "Mirror", "Options": { "BOTTOMBOTTOM": "" } },
+                { "Name": "Mirror Left", "Filter": "Mirror", "Options": { "LEFTLEFT": "" } },
+                { "Name": "Mirror Right", "Filter": "Mirror", "Options": { "RIGHTRIGHT": "" } }
+            ]
+        }
+      ]
+    },
+    {
+      "Name": "Core Image",
+      "Children": [
+        {
+          "Name": "Monochrome",
+          "Children": [
+            { "Name": "Grayscale", "Filter": "CI Grayscale" },
+            { "Name": "Noir", "Filter": "CI Noir" },
+            { "Name": "Max Component", "Filter": "CI MaxComponent" },
+            { "Name": "Min Component", "Filter": "CI MinComponent" }
+          ]
+        },
+        {
+          "Name": "Halftone",
+          "Children": [
+            { "Name": "CMYK Halftone", "Filter": "CI CMYKHalftone" },
+            { "Name": "Dot Screen", "Filter": "CI DotScreen" },
+            { "Name": "Hatched Screen", "Filter": "CI HatchedScreen" },
+            { "Name": "Line Screen", "Filter": "CI LineScreen" },
+            { "Name": "Circular Screen", "Filter": "CI CircularScreen" }
+          ]
+        },
+        {
+            "Name": "Tile",
+            "Children": [
+                { "Name": "Kaleidoscope", "Filter": "CI Kaleidoscope" },
+                { "Name": "Triangle Tile", "Filter": "CI Triangle Tile" },
+                { "Name": "Four-Fold Tile", "Filter": "CI Fourfold Reflected Tile" },
+                { "Name": "Six-Fold Tile", "Filter": "CI Sixfold Reflected Tile" },
+                { "Name": "Eight-Fold Tile", "Filter": "CI Eightfold Reflected Tile" },
+                { "Name": "Twelve-Fold Tile", "Filter": "CI Twelvefold Reflected Tile" }
+            ]
+        },
+        {
+          "Name": "Stylize",
+          "Children": [
+            { "Name": "Dither", "Filter": "CI Dither" },
+            { "Name": "Line Overlay", "Filter": "CI LineOverlay" },
+            { "Name": "Comic Effect", "Filter": "CI ComicEffect" }
+          ]
+        }
+      ]
+    }
+  ]
+}
