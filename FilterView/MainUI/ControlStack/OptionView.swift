@@ -9,9 +9,85 @@ import SwiftUI
 
 struct OptionView: View
 {
+    var SourceName: String = "Built-in image"
+    var FilterName: String = "None"
+    /// How long the last render took. `nil` shows a dash.
+    var RenderTime: Duration? = nil
+    /// Size in pixels of the image being filtered. `nil` shows a dash.
+    var ImageSize: CGSize? = nil
+    /// The original, unfiltered image, shown as a thumbnail. `nil` shows a placeholder.
+    var SourceImage: Image? = nil
+
+    /// The image size as "width × height px", or a dash if it is not known.
+    private var ImageSizeText: String
+    {
+        guard let ImageSize = ImageSize else
+        {
+            return "-"
+        }
+        let Width = Int(ImageSize.width).formatted(.number.grouping(.never))
+        let Height = Int(ImageSize.height).formatted(.number.grouping(.never))
+        return "\(Width) × \(Height) px"
+    }
+
+    /// The render time in milliseconds, or a dash if there is none.
+    private var RenderTimeText: String
+    {
+        guard let RenderTime = RenderTime else
+        {
+            return "-"
+        }
+        return RenderTime.formatted(.units(allowed: [.milliseconds], width: .abbreviated, fractionalPart: .show(length: 1)))
+    }
+
     var body: some View
     {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack
+        {
+            HStack
+            {
+                VStack
+                {
+                    HStack
+                    {
+                        Text("Source")
+                        Text(SourceName)
+                            .bold()
+                        Spacer()
+                    }
+                    HStack
+                    {
+                        Text("Dimensions")
+                        Text(ImageSizeText)
+                            .bold()
+                        Spacer()
+                    }
+                    HStack
+                    {
+                        Text("Render time")
+                        Text(RenderTimeText)
+                            .bold()
+                        Spacer()
+                    }
+                }
+                // The original, unfiltered image, as a thumbnail. A placeholder shows until there is one.
+                (SourceImage ?? Image(systemName: "photo"))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: 100, maxHeight: 100)
+                    .background(.black)
+            }
+            Spacer()
+            Divider()
+            HStack
+            {
+                Text("Filter")
+                Text(FilterName)
+                    .bold()
+                Spacer()
+            }
+        }
     }
 }
 

@@ -35,13 +35,12 @@ extension MetalProcessor
     {
         guard let Device = Device,
               let Queue = Queue,
-              let Loader = Loader,
               MPSSupportsMTLDevice(Device) else
         {
             throw FilterException(Message: "Metal Performance Shaders are not available")
         }
 
-        let Source = try await Loader.newTexture(cgImage: Input, options: [.SRGB: false])
+        let Source = try MakeSourceTexture(From: Input)
         let Descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: KeepSourceFormat ? Source.pixelFormat : .rgba8Unorm,
                                                                   width: Source.width,
                                                                   height: Source.height,

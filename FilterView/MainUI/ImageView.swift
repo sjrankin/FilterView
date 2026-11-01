@@ -15,6 +15,9 @@ struct ImageView: View
     var Selection: FilterSelection? = nil
     /// Changes whenever the parent supplies a different image, which restarts the filter task.
     var SourceID = UUID()
+    /// Called with how long the filter took to produce the image (from the call to the finished image), or `nil` if there is no
+    /// filter or it failed.
+    var OnRendered: ((Duration?) -> Void)? = nil
     @State private var FilteredImage: Image?
     /// The `SourceID` that `FilteredImage` was made from. A result for an older image is never shown.
     @State private var FilteredFor: UUID?
@@ -36,11 +39,10 @@ struct ImageView: View
             guard let Selection = Selection else
             {
                 FilteredImage = nil
+                OnRendered?(nil)
                 return
             }
-            #if DEBUG
             let StartTime = ContinuousClock.now
-            #endif
             do
             {
                 let Result = try await DisplayImage.Filtered(Filter: Selection.Filter,
@@ -50,14 +52,17 @@ struct ImageView: View
                 {
                     FilteredImage = Result
                     FilteredFor = Current
+                    let Elapsed = ContinuousClock.now - StartTime
+                    OnRendered?(Elapsed)
                     #if DEBUG
-                    print("Filter \(Selection.Filter): \(ContinuousClock.now - StartTime) from call to display")
+                    print("Filter \(Selection.Filter): \(Elapsed) from call to display")
                     #endif
                 }
             }
             catch
             {
                 FilteredImage = nil
+                OnRendered?(nil)
                 #if DEBUG
                 print("Filter \(Selection.Filter): failed after \(ContinuousClock.now - StartTime) (\(error))")
                 #endif

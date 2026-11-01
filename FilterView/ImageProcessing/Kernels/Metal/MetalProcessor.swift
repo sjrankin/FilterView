@@ -26,8 +26,6 @@ actor MetalProcessor
     /// Internal (not private) so `MetalProcessor+MPS.swift` can use it.
     let Queue: MTLCommandQueue?
     private let Library: MTLLibrary?
-    /// Internal (not private) so `MetalProcessor+MPS.swift` can use it.
-    let Loader: MTKTextureLoader?
     private var Pipelines = [String: MTLComputePipelineState]()
 
     init()
@@ -36,7 +34,6 @@ actor MetalProcessor
         Device = GPU
         Queue = GPU?.makeCommandQueue()
         Library = GPU?.makeDefaultLibrary()
-        Loader = GPU.map{MTKTextureLoader(device: $0)}
     }
 
     /// Returns the compiled pipeline (from `Run`) for a kernel, compiling and caching it on first use.
@@ -74,14 +71,13 @@ actor MetalProcessor
     {
         let State = try Pipeline(For: Kernel)
         guard let Device = Device,
-              let Queue = Queue,
-              let Loader = Loader else
+              let Queue = Queue else
         {
             throw FilterException(Message: "Metal is not available")
         }
 
         // Create a texture from the image.
-        let Source = try await Loader.newTexture(cgImage: Input, options: [.SRGB: false])
+        let Source = try MakeSourceTexture(From: Input)
         let Width = Source.width
         let Height = Source.height
 

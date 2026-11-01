@@ -96,7 +96,8 @@
             {
                 "Name": "Monochrome",
                 "Children": [
-                    { "Name": "Atkinson Dither", "Filter": "Atkinson Dither" }
+                    { "Name": "Atkinson Dither", "Filter": "Atkinson Dither" },
+                    { "Name": "Atkinson Dither (Fast)", "Filter": "Atkinson Dither Fast" }
                 ]
             }
             ]

@@ -16,4 +16,8 @@ struct FilterSelection: Hashable, Sendable
 
     /// Options for the filter. `nil` if it takes none.
     let Options: [String: String]?
+
+    /// The label of the tree entry that was chosen, such as "Kuwahara Radius 4". Unlike `Filter`, it tells entries that share
+    /// a filter apart.
+    let DisplayName: String
 }

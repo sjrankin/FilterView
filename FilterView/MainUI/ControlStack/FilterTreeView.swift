@@ -30,7 +30,7 @@ struct FilterTreeView: View
                 if let Leaf = Root.Leaves().first(where: {$0.id == NewNode}),
                    let Name = Leaf.Filter
                 {
-                    Selection = FilterSelection(Filter: Name, Options: Leaf.Options)
+                    Selection = FilterSelection(Filter: Name, Options: Leaf.Options, DisplayName: Leaf.Name)
                 }
             }
         }

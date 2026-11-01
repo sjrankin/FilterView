@@ -6,164 +6,116 @@
 //
 
 import SwiftUI
-import UniformTypeIdentifiers
 
+/// The main window: the image area and input controls on the left, a draggable divider, and the filter and option panel on the
+/// right. The pieces are in `ImagePane`, `InputControlBar`, `PanelDivider`, and `ControlStack`; the actions are in
+/// `MainUI+Actions.swift`.
 struct MainUI: View
 {
     @Binding var Filters: FilterServer?
     var FilterTreeData: FilterNode?
-    @State private var Selection: FilterSelection? = nil
+    // These are not private because the functions in `MainUI+Actions.swift` use them.
+    @State var Selection: FilterSelection? = nil
     @State var SourceImage = Image("Hana")
     @State var SourceID = UUID()
-    @State private var InputSource: ImageInputSources = .Image
-    @State var IsDropTargeted = false
+    /// Where `SourceImage` came from: the built-in image, a file name, or a camera photo. Live video is described
+    /// separately (see `DisplayedSourceName`) because `SourceImage` is not used while it runs.
+    @State var SourceName = "Built-in image"
+    /// How long the last render took. `nil` if there is no filter or nothing has rendered yet.
+    @State var RenderTime: Duration? = nil
+    /// Size in pixels of `SourceImage`. `nil` until known.
+    @State var SourceSize: CGSize? = nil
+    /// Size in pixels of the live video frames. `nil` until the first frame arrives.
+    @State var LiveSize: CGSize? = nil
+    @State var InputSource: ImageInputSources = .Image
     @State var ShowExporter = false
-    @State private var ExportDocument = ImageUtility.PNGImage(Data: Data())
-    @State private var ShowImporter = false
-    
+    @State var ExportDocument = ImageUtility.PNGImage(Data: Data())
+    @State var ShowCamera = false
+    @State var PanelWidth: CGFloat = 300
+    @State var Camera = CameraFrameSource()
+    /// The newest live video frame, already filtered. `nil` until the first frame arrives.
+    @State var LiveImage: Image? = nil
+    /// The newest live video frame before filtering, for the original-image thumbnail. `nil` until the first frame arrives.
+    @State var LiveSource: Image? = nil
+    /// Frame rate limit for live video, in frames per second.
+    @State var MaxFPS = 15.0
+    /// Writes the filtered live video to a file while recording.
+    @State var Recorder = VideoRecorder()
+    @State var IsRecording = false
+    /// The last finished recording. Save can save it again until the next recording replaces it.
+    @State var LastMovie: RecordedMovie? = nil
+    /// Shows the dialog that asks where to save `LastMovie`.
+    @State var ShowMovieExporter = false
+
     var body: some View
     {
-        HStack
+        HStack(spacing: 0)
         {
             VStack
             {
-                ImageView(DisplayImage: SourceImage,
+                ImagePane(InputSource: InputSource,
+                          LiveImage: LiveImage,
+                          SourceImage: SourceImage,
                           Server: Filters,
                           Selection: Selection,
-                          SourceID: SourceID)
-                #if os(macOS)
-                .dropDestination(for: URL.self)
-                {
-                    URLs, _ in
-                    guard let FirstImage = URLs.first,
-                          let Dropped = ImageUtility.LoadImage(from: FirstImage) else
+                          SourceID: SourceID,
+                          OnRendered: { RenderTime = $0 },
+                          OnDropped: UseDroppedImage)
+                    .frame(minHeight: 200)
+                    // Selecting Video starts the camera; selecting anything else cancels this task, which stops it.
+                    .task(id: InputSource)
                     {
-                        return false
+                        await RunLiveVideo()
                     }
-                    SourceImage = ImageUtility.CGImageToImage(Dropped)
-                    SourceID = UUID()
-                    return true
-                }
-            isTargeted:
-                {
-                    IsDropTargeted = $0
-                }
-                .overlay
-                {
-                    if IsDropTargeted
+                    .onChange(of: MaxFPS)
                     {
-                        RoundedRectangle(cornerRadius: 8).stroke(.tint, lineWidth: 3)
+                        Camera.MaxFPS = MaxFPS
                     }
-                }
-                #endif
-                .frame(minHeight: 200)
-                HStack
-                {
-                    Picker("", selection: $InputSource)
+                    .task
                     {
-                        ForEach(ImageInputSources.allCases)
+                        MeasureBuiltInImage()
+                    }
+                    #if os(iOS)
+                    // The system camera.
+                    .fullScreenCover(isPresented: $ShowCamera)
+                    {
+                        CameraPicker
                         {
-                            SomeSource in
-                            Text(SomeSource.rawValue).tag(SomeSource)
+                            UseCapturedPhoto($0)
+                        }
+                        .ignoresSafeArea()
+                    }
+                    #else
+                    // macOS has no system camera interface, so this is a capture sheet.
+                    .sheet(isPresented: $ShowCamera)
+                    {
+                        MacCameraSheet
+                        {
+                            UseCapturedPhoto($0)
                         }
                     }
-                    .pickerStyle(.segmented)
-                    Spacer()
-                    if InputSource == .Image
-                    {
-                        Button("Load")
-                        {
-                            ShowImporter = true
-                        }
-                        .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image])
-                        {
-                            Result in
-                            switch Result
-                            {
-                                case .success(let Selected):
-                                    ImportLoadedImage(Selected)
-                                    
-                                case .failure(let Failure):
-                                    print("Load failed: \(Failure)")
-                            }
-                        }
-                    }
-                    Button("Save")
-                    {
-                        Task
-                        {
-                            await PrepareExport()
-                        }
-                    }
-                    .fileExporter(isPresented: $ShowExporter,
-                                  document: ExportDocument,
-                                  contentType: .png,
-                                  defaultFilename: "Filtered")
-                    {
-                        Result in
-                        switch Result
-                        {
-                            case .success(let Saved):
-                                print("Saved to \(Saved)")
-                                
-                            case .failure(let Failure):
-                                print("Save failed: \(Failure)")
-                        }
-                    }
-                }
-                .padding()
+                    #endif
+                InputControlBar(InputSource: $InputSource,
+                                MaxFPS: $MaxFPS,
+                                ShowExporter: $ShowExporter,
+                                ExportDocument: ExportDocument,
+                                OnLoad: ImportLoadedImage,
+                                OnTakePhoto: { ShowCamera = true },
+                                OnSave: PrepareExport,
+                                IsRecording: IsRecording,
+                                Movie: LastMovie,
+                                ShowMovieExporter: $ShowMovieExporter,
+                                OnRecord: { Task { await StartRecording() } },
+                                OnStop: StopRecording)
+                    .padding()
             }
-            Spacer()
-            ControlStack(FilterTreeData: FilterTreeData, Selection: $Selection)
+            PanelDivider(Size: $PanelWidth)
+            ControlStack(FilterTreeData: FilterTreeData, Selection: $Selection, SourceName: DisplayedSourceName,
+                         FilterName: Selection?.DisplayName ?? "None", RenderTime: RenderTime,
+                         ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage)
+                .frame(width: PanelWidth)
         }
     }
-
-    private func ImportLoadedImage(_ NewImage: URL)
-    {
-        let Scope = NewImage.startAccessingSecurityScopedResource()
-        defer
-        {
-            if Scope
-            {
-                NewImage.stopAccessingSecurityScopedResource()
-            }
-        }
-        guard let Loaded = ImageUtility.LoadImage(from: NewImage) else
-        {
-            return
-        }
-        SourceImage = ImageUtility.CGImageToImage(Loaded)
-        SourceID = UUID()
-    }
-    
-    /// Applies the selected filter (if any) to the image, encodes it as PNG, and shows the save dialog.
-    private func PrepareExport() async
-    {
-        guard var Result = ImageUtility.ImageToCGImage(SourceImage) else
-        {
-            return
-        }
-        if let Selection = Selection,
-           let Server = Filters,
-           let Filtered = try? await Server.Run(Filter: Selection.Filter, With: Result, Selection.Options)
-        {
-            Result = Filtered
-        }
-        guard let Encoded = ImageUtility.ImageEncoder.PNGData(Result) else
-        {
-            return
-        }
-        ExportDocument = ImageUtility.PNGImage(Data: Encoded)
-        ShowExporter = true
-    }
-}
-
-enum ImageInputSources: String, CaseIterable, Identifiable
-{
-    case Image = "Image"
-    case Camera = "Camera"
-    case Video = "Video"
-    var id: String { rawValue }
 }
 
 #Preview
