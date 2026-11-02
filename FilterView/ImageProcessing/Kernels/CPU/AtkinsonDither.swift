@@ -17,6 +17,9 @@ class AtkinsonDither: ImageFilter
     /// Option key for the black/white threshold, a `Float` in 0.0 to 1.0. Default is 0.5.
     static let ThresholdKey = "Threshold"
 
+    /// Option key for using the faster `AtkinsonDitherFast` instead. The value is `true` or `false`; the default is `false`.
+    static let OptimizedKey = "OPTIMIZED"
+
     var FilterType: ImageFilterTypes
     {
         .CPU
@@ -24,11 +27,15 @@ class AtkinsonDither: ImageFilter
 
     /// Dither the passed image to black and white using Atkinson error diffusion.
     /// - Parameter Input: The image to process.
-    /// - Parameter Options: Optional dictionary. Recognized key is `ThresholdKey`.
+    /// - Parameter Options: Optional dictionary. Recognized keys are `ThresholdKey` and `OptimizedKey`.
     /// - Returns: An 8-bit grayscale image containing only black and white pixels.
     /// - Throws: `FilterException` if the image cannot be read or written, `CancellationError` if cancelled.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
+        if Options?[AtkinsonDither.OptimizedKey] as? String == "true"
+        {
+            return try await AtkinsonDitherFast().ProcessImage(Input, Options)
+        }
         try Task.checkCancellation()
 
         let Width = Input.width

@@ -58,6 +58,7 @@ class FilterServer
         Register(AtkinsonDither.FilterName, AtkinsonDither())
         Register(ColorScale.FilterName, ColorScale())
         Register(ColorScaleColor.FilterName, ColorScaleColor())
+        Register(BackgroundClear.FilterName, BackgroundClear())
     }
 
     /// Adds a filter, remembering the order in which it was added.

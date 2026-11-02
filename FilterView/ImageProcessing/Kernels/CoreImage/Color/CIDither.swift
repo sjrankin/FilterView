@@ -25,7 +25,7 @@ class CIDither: ImageFilter
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.dither()
         filter.inputImage = ci
-        filter.intensity = 0.5
+        filter.intensity = Float(FilterOptionValues.Number(Options, "INTENSITY", Default: 0.5))
         if let final = filter.outputImage
         {
             if let final = ImageUtility.CIImageToCGImage(final)

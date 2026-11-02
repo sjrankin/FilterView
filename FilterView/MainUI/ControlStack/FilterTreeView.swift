@@ -30,7 +30,10 @@ struct FilterTreeView: View
                 if let Leaf = Root.Leaves().first(where: {$0.id == NewNode}),
                    let Name = Leaf.Filter
                 {
-                    Selection = FilterSelection(Filter: Name, Options: Leaf.Options, DisplayName: Leaf.Name)
+                    // The saved value of each parameter goes into the options, so the filter starts with what the user last chose.
+                    let Parameters = Leaf.Parameters ?? []
+                    let Options = FilterOptionStore.Shared.Merged(Filter: Name, Fixed: Leaf.Options, Parameters: Parameters)
+                    Selection = FilterSelection(Filter: Name, Options: Options, DisplayName: Leaf.Name, Parameters: Parameters)
                 }
             }
         }

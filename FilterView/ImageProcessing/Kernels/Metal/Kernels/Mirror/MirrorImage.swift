@@ -9,7 +9,7 @@ import Foundation
 import CoreGraphics
 
 /// Mirrors one half of an image onto the other half so the halves meet with no seam. Which half is copied is chosen
-/// by the key in `Options`, using the Metal kernel for that half.
+/// by the `"HALF"` value in `Options`, using the Metal kernel for that half.
 struct MirrorImage: ImageFilter
 {
     static let FilterName = "Mirror"
@@ -21,8 +21,8 @@ struct MirrorImage: ImageFilter
     
     /// Mirrors one half of the image.
     /// - Parameter Input: The image to process.
-    /// - Parameter Options: Dictionary with exactly one key from `MirroringOptions` (the value is ignored). If it does not
-    /// have exactly one recognized key, the original image is returned.
+    /// - Parameter Options: Dictionary whose `"HALF"` key holds one value from `MirroringOptions`. If it is missing or not
+    /// recognized, the original image is returned.
     ///   - "TOPTOP": The top half is copied to the bottom half, upside down.
     ///   - "BOTTOMBOTTOM": The bottom half is copied to the top half, upside down.
     ///   - "LEFTLEFT": The left half is copied to the right half, flipped.
@@ -31,9 +31,7 @@ struct MirrorImage: ImageFilter
     /// - Throws: Throws exceptions on error.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
-        guard let Options = Options,
-              Options.count == 1,
-              let Key = Options.keys.first else
+        guard let Key = Options?[MirrorImage.HalfKey] as? String else
         {
             return Input
         }
@@ -55,6 +53,9 @@ struct MirrorImage: ImageFilter
                 return Input
         }
     }
+    
+    /// Option key that holds the half to copy.
+    static let HalfKey = "HALF"
 }
 
 enum MirroringOptions: String

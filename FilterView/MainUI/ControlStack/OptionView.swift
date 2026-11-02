@@ -9,6 +9,8 @@ import SwiftUI
 
 struct OptionView: View
 {
+    /// The selected filter, whose options are edited in the panel under the image information.
+    @Binding var Selection: FilterSelection?
     var SourceName: String = "Built-in"
     var FilterName: String = "None"
     /// How long the last render took. `nil` shows a dash.
@@ -85,7 +87,8 @@ struct OptionView: View
                     .frame(maxWidth: 100, maxHeight: 100)
                     .background(.black)
             }
-            Spacer()
+            Divider()
+            FilterOptionsView(Selection: $Selection)
             Divider()
             HStack
             {
@@ -101,5 +104,6 @@ struct OptionView: View
 
 #Preview
 {
-    OptionView()
+    @Previewable @State var Selected: FilterSelection? = nil
+    OptionView(Selection: $Selected)
 }

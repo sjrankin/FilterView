@@ -126,6 +126,7 @@ extension MainUI
     {
         guard Pipeline.IsOpen,
               InputSource != .Video,
+              Pipeline.IgnoredSourceID != SourceID,
               let Original = ImageUtility.ImageToCGImage(SourceImage) else
         {
             return
@@ -136,7 +137,7 @@ extension MainUI
         }
     }
 
-    /// Makes the pipeline's final image the source image, ending any live video.
+    /// Makes the pipeline's final image the source image, ending any live video. The pipeline itself is left as it is.
     /// - Parameter Result: The image.
     func UsePipelineResult(_ Result: CGImage)
     {
@@ -144,6 +145,8 @@ extension MainUI
         SourceName = "Pipeline result"
         SourceSize = CGSize(width: Result.width, height: Result.height)
         SourceID = UUID()
+        // The pipeline keeps its own original image and filters; this new main image is not its new start.
+        Pipeline.IgnoredSourceID = SourceID
         InputSource = .Image
     }
 

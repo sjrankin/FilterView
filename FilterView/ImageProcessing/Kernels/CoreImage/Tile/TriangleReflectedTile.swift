@@ -25,9 +25,9 @@ class CITriangleFoldReflectedTile: ImageFilter
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.triangleTile()
         filter.inputImage = ci
-        filter.center = ImageUtility.CGImageCenter(Input)
-        filter.angle = 1.0
-        filter.width = 120
+        filter.center = FilterOptionValues.Center(Options, Input)
+        filter.angle = Float(FilterOptionValues.Radians(Options, "ANGLE", DefaultDegrees: 1.0 * 180.0 / .pi))
+        filter.width = Float(FilterOptionValues.Number(Options, "WIDTH", Default: 120))
         guard let result = filter.outputImage?.cropped(to: ci.extent),
               let final = ImageUtility.CIImageToCGImage(result) else
         {

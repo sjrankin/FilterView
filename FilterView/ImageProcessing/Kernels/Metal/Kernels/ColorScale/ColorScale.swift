@@ -23,28 +23,28 @@ struct ColorScale: ImageFilter
     /// - Options: Dictionary of `[String: Any]` with the recognized keys in the Notes.
     /// - Returns: Processed image.
     /// - Throws: Throws exceptions on error.
-    /// - Note: The caller sends  a set of channels in the `Options` dictionary. Only the keys of the dictionary are
-    /// used in this filter. If the `Options` dictionary does not contain exactly one value, the original image will be returned
-    /// with no processing. Channel name (keys) are listed below. These are also defineded in the `ScaleChannels` enum in this
-    /// file and the caller is strongly suggested to use that enum when calling this function.
+    /// - Note: The channel to scale on is the value of the `"CHANNEL"` key. The values are also defined in the `ScaleChannels`
+    /// enum in this file and the caller is strongly suggested to use that enum when calling this function.
     ///   - "GRAY": Use the mean of the red, green, and blue channels to populate all of the channels.
     ///   - "RED": Use the red channel to populate the green and blue channels.
-    ///   - "GREEN": Use the green channel to populate the green and blue channels.
+    ///   - "GREEN": Use the green channel to populate the red and blue channels.
     ///   - "BLUE": Use the blue channel to populate the red and green channels.
     ///   - "CYAN": Use the mean of green and blue channels to populate the all of the channels.
     ///   - "MAGENTA": Use the mean of red and blue channels to populate the all of the channels.
     ///   - "YELLOW": Use the mean of red and green channels to populate the all of the channels.
-    /// - Note: If there are no recognized channels in `Options`, the original image will be returned unchanged.
+    /// - Note: If the `"COLOR"` key is `"true"`, the scale is shown in its color (by `ColorScaleColor`) instead of as pure gray. Gray
+    /// has no color version, so `"COLOR"` does not apply to it.
+    /// - Note: If there is no recognized channel in `Options`, the original image will be returned unchanged.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]?) async throws -> CGImage
     {
-        guard let Options = Options,
-              Options.count == 1 else
+        guard let Channel = Options?[ColorScale.ChannelKey] as? String else
         {
             return Input
         }
-        guard let Channel = Options.keys.first else
+        if Options?[ColorScale.ColorKey] as? String == "true",
+           Channel != ScaleChannels.Gray.rawValue
         {
-            return Input
+            return try await ColorScaleColor().ProcessImage(Input, [Channel: ""])
         }
         switch Channel
         {
@@ -73,6 +73,12 @@ struct ColorScale: ImageFilter
                 return Input
         }
     }
+    
+    /// Option key that holds the channel to scale on.
+    static let ChannelKey = "CHANNEL"
+    
+    /// Option key for showing the scale in its color. The value is `true` or `false`.
+    static let ColorKey = "COLOR"
 }
 
 /// Channels and channel combinations.

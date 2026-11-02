@@ -25,9 +25,9 @@ class CIKaleidoscope: ImageFilter
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.kaleidoscope()
         filter.inputImage = ci
-        filter.center = ImageUtility.CGImageCenter(Input)
-        filter.angle = 0.0
-        filter.count = 6
+        filter.center = FilterOptionValues.Center(Options, Input)
+        filter.angle = Float(FilterOptionValues.Radians(Options, "ANGLE", DefaultDegrees: 0))
+        filter.count = Int(FilterOptionValues.Number(Options, "COUNT", Default: 6).rounded())
         guard let result = filter.outputImage,
               let final = ImageUtility.CIImageToCGImage(result) else
         {

@@ -8,7 +8,7 @@
 import Foundation
 import CoreGraphics
 
-/// Inverts the colors of an image using the `InvertColor` Metal kernel.
+/// Swaps two color channels of an image using the `SwapRG`, `SwapRB`, and `SwapGB` Metal kernels.
 struct ChannelSwap: ImageFilter
 {
     static let FilterName = "Channel Swap"
@@ -18,34 +18,20 @@ struct ChannelSwap: ImageFilter
         .Metal
     }
     
-    /// Invert channels in the colors of the passed image. The caller determines which channels to invert.
+    /// Swaps two channels of the passed image.
     /// - Parameter Input: The image to process.
-    /// - Options: Dictionary of `[String: Any]` with the recognized keys in the Notes.
+    /// - Options: Dictionary of `[String: Any]` with the recognized key in the Notes.
     /// - Returns: Processed image.
     /// - Throws: Throws exceptions on error.
-    /// - Note: The caller sends  a set of channels in the `Options` dictionary. Only the keys of the dictionary are
-    /// used in this filter. If the `Options` dictionary does not contain exactly one value, the original image will be returned
-    /// with no processing. Channel name (keys) are listed below. These are also defineded in the `Channels` enum in this
-    /// file and the caller is strongly suggested to use that enum when calling this function.
-    ///   - "RED": Invert the red channel.
-    ///   - "GREEN": Invert the green channel.
-    ///   - "BLUE": Invert the blue channel.
-    ///   - "REDGREEN": Invert the red and green channels.
-    ///   - "REDBLUE": Invert the red and blue channels.
-    ///   - "GREENBLUE": Invert the green and blue channels.
-    /// - Note: If there are no recognized channels in `Options`, the original image will be returned unchanged.
+    /// - Note: The channels to swap are the value of the `"CHANNELS"` key. The values are also defined in the `SwapChannels`
+    /// enum in this file and the caller is strongly suggested to use that enum when calling this function.
+    ///   - "REDGREEN": Swap the red and green channels.
+    ///   - "REDBLUE": Swap the red and blue channels.
+    ///   - "GREENBLUE": Swap the green and blue channels.
+    /// - Note: If there is no recognized value, the original image will be returned unchanged.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]?) async throws -> CGImage
     {
-        guard let Options = Options,
-              Options.count == 1 else
-        {
-            return Input
-        }
-        guard let Channel = Options.keys.first else
-        {
-            return Input
-        }
-        switch Channel
+        switch Options?[ChannelSwap.ChannelsKey] as? String
         {
             case SwapChannels.RedBlue.rawValue:
                 return try await MetalProcessor.Shared.Run(Kernel: "SwapRB", On: Input)
@@ -60,6 +46,9 @@ struct ChannelSwap: ImageFilter
                 return Input
         }
     }
+    
+    /// Option key that holds the channels to swap.
+    static let ChannelsKey = "CHANNELS"
 }
 
 /// Channels and channel combinations.

@@ -18,8 +18,14 @@ struct MetalBrightnessInvert: ImageFilter
         .Metal
     }
     
+    /// Inverts the brightness of the image.
+    /// - Parameter Options: If `"COLOR"` is `"true"`, the colors are kept (by `ColorBrightnessInvert`); otherwise the result is gray.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
     {
+        if FilterOptionValues.Flag(Options, "COLOR")
+        {
+            return try await ColorBrightnessInvert().ProcessImage(Input, Options)
+        }
         return try await MetalProcessor.Shared.Run(Kernel: "InvertBrightness", On: Input)
     }
 }

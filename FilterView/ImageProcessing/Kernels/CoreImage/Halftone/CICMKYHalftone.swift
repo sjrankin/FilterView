@@ -25,11 +25,11 @@ class CICMYKHalftone: ImageFilter
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.cmykHalftone()
         filter.inputImage = ci
-        filter.angle = 1
-        filter.width = 4
-        filter.center = ImageUtility.CGImageCenter(Input)
-        filter.grayComponentReplacement = 1
-        filter.underColorRemoval = 0.1
+        filter.angle = Float(FilterOptionValues.Radians(Options, "ANGLE", DefaultDegrees: 1.0 * 180.0 / .pi))
+        filter.width = Float(FilterOptionValues.Number(Options, "WIDTH", Default: 4))
+        filter.center = FilterOptionValues.Center(Options, Input)
+        filter.grayComponentReplacement = Float(FilterOptionValues.Number(Options, "GCR", Default: 1))
+        filter.underColorRemoval = Float(FilterOptionValues.Number(Options, "UCR", Default: 0.1))
         guard let result = filter.outputImage,
               let final = ImageUtility.CIImageToCGImage(result) else
         {

@@ -35,7 +35,7 @@ struct ControlStack: View
             FilterTreeView(Root: FilterTreeData, Selection: $Selection)
                 .frame(minHeight: 100)
             PanelDivider(Size: $OptionHeight, Direction: .vertical, MinSize: 120, MaxSize: 500)
-            OptionView(SourceName: SourceName, FilterName: FilterName, RenderTime: RenderTime, ImageSize: ImageSize,
+            OptionView(Selection: $Selection, SourceName: SourceName, FilterName: FilterName, RenderTime: RenderTime, ImageSize: ImageSize,
                        SourceImage: SourceImage)
                 .frame(height: OptionHeight)
         }

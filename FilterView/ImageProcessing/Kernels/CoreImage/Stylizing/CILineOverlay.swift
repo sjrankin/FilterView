@@ -25,11 +25,11 @@ class CILineOverlay: ImageFilter
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.lineOverlay()
         filter.inputImage = ci
-        filter.nrNoiseLevel = 0.07
-        filter.nrSharpness = 0.85
-        filter.edgeIntensity = 1
-        filter.threshold = 0.1
-        filter.contrast = 50.0
+        filter.nrNoiseLevel = Float(FilterOptionValues.Number(Options, "NOISE", Default: 0.07))
+        filter.nrSharpness = Float(FilterOptionValues.Number(Options, "SHARPNESS", Default: 0.85))
+        filter.edgeIntensity = Float(FilterOptionValues.Number(Options, "EDGE", Default: 1))
+        filter.threshold = Float(FilterOptionValues.Number(Options, "THRESHOLD", Default: 0.1))
+        filter.contrast = Float(FilterOptionValues.Number(Options, "CONTRAST", Default: 50))
         //The filter outputs black lines on a transparent background. Put them on white so the result
         //is visible on any background.
         guard let lines = filter.outputImage else

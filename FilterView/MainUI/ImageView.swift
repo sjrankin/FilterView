@@ -30,6 +30,7 @@ struct ImageView: View
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(.white)
+                .background(Checkerboard())
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black, ignoresSafeAreaEdges: [])

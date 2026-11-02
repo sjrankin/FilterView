@@ -22,6 +22,10 @@ struct FilterNode: Codable, Identifiable, Sendable
     /// Options handed to the filter. `nil` if the filter has none.
     let Options: [String: String]?
 
+    /// Options the user can change, each with a control in the options panel. `nil` if there are none. Their saved values are added
+    /// to `Options` when the filter is chosen.
+    let Parameters: [FilterParameter]?
+
     /// Child nodes. `nil` for leaves.
     let Children: [FilterNode]?
 
@@ -43,6 +47,7 @@ struct FilterNode: Codable, Identifiable, Sendable
         case Name
         case Filter
         case Options
+        case Parameters
         case Children
     }
 

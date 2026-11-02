@@ -20,4 +20,15 @@ struct FilterSelection: Hashable, Sendable
     /// The label of the tree entry that was chosen, such as "Kuwahara Radius 4". Unlike `Filter`, it tells entries that share
     /// a filter apart.
     let DisplayName: String
+
+    /// The options the user can change for this entry. Their current values are in `Options`.
+    let Parameters: [FilterParameter]
+
+    /// The same selection with one option changed.
+    func Updating(Key: String, Value: String) -> FilterSelection
+    {
+        var Changed = Options ?? [:]
+        Changed[Key] = Value
+        return FilterSelection(Filter: Filter, Options: Changed, DisplayName: DisplayName, Parameters: Parameters)
+    }
 }
