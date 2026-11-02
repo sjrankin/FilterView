@@ -32,8 +32,8 @@ struct BackgroundClear: ImageFilter
     ///   Default is 0.1.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]?) async throws -> CGImage
     {
-        let Target = BackgroundClear.ParseColor(Options?["TARGET"] as? String) ?? [1, 1, 1, 1]
-        let Replacement = BackgroundClear.ParseColor(Options?["SOURCE"] as? String) ?? [0, 0, 0, 0]
+        let Target = FilterOptionValues.ParseColor(Options?["TARGET"] as? String) ?? [1, 1, 1, 1]
+        let Replacement = FilterOptionValues.ParseColor(Options?["SOURCE"] as? String) ?? [0, 0, 0, 0]
         var Tolerance = BackgroundClear.DefaultTolerance
         if let Text = Options?["TOLERANCE"] as? String,
            let Value = Float(Text)
@@ -47,29 +47,4 @@ struct BackgroundClear: ImageFilter
     
     /// Tolerance when none is given.
     static let DefaultTolerance: Float = 0.1
-    
-    /// Converts a hexadecimal color string to red, green, blue, and alpha values, each 0.0 to 1.0.
-    /// - Parameter Text: `RRGGBB` or `RRGGBBAA`, with or without a leading `#`.
-    /// - Returns: Four values, or `nil` if the text is missing or is not a color.
-    static func ParseColor(_ Text: String?) -> [Float]?
-    {
-        guard var Digits = Text?.trimmingCharacters(in: .whitespaces) else
-        {
-            return nil
-        }
-        if Digits.hasPrefix("#")
-        {
-            Digits.removeFirst()
-        }
-        guard Digits.count == 6 || Digits.count == 8,
-              let Value = UInt32(Digits, radix: 16) else
-        {
-            return nil
-        }
-        let Packed = Digits.count == 6 ? (Value << 8) | 0xFF : Value
-        return [Float((Packed >> 24) & 0xFF) / 255.0,
-                Float((Packed >> 16) & 0xFF) / 255.0,
-                Float((Packed >> 8) & 0xFF) / 255.0,
-                Float(Packed & 0xFF) / 255.0]
-    }
 }

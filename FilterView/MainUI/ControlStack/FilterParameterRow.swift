@@ -101,6 +101,19 @@ struct FilterParameterRow: View
                     }
                 }
 
+            case .Text:
+                HStack(alignment: .firstTextBaseline)
+                {
+                    Text(Parameter.Title)
+                        .lineLimit(2)
+                        .frame(width: 84, alignment: .leading)
+                    // The filter runs as the text changes, like the sliders.
+                    TextField(Parameter.Title, text: Binding(get: {Current}, set: {Commit($0)}), axis: .vertical)
+                        .labelsHidden()
+                        .lineLimit(1 ... 4)
+                        .textFieldStyle(.roundedBorder)
+                }
+
             case .Segments:
                 VStack(alignment: .leading)
                 {

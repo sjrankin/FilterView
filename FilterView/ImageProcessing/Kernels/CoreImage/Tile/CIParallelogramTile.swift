@@ -1,0 +1,42 @@
+//
+//  CIParallelogramTile.swift
+//  FilterView
+//
+//  Created by Stuart Rankin on 11/2/26.
+//
+
+import Foundation
+import CoreGraphics
+import CoreImage
+import CoreImage.CIFilterBuiltins
+
+/// Tiles the image in parallelograms. Options: `CENTERX`, `CENTERY` (percent of the width and height; default 50), `ANGLE` (degrees;
+/// default 0), `ACUTE` (the sharper angle of the parallelogram, in degrees; default 90), and `WIDTH` (tile width; default 100).
+class CIParallelogramTile: ImageFilter
+{
+    static let FilterName = "CI Parallelogram Tile"
+    
+    var FilterType: ImageFilterTypes
+    {
+        .CoreImage
+    }
+    
+    func ProcessImage(_ Input: CGImage, _ Options: [String: Any]? = nil) async throws -> CGImage
+    {
+        try Task.checkCancellation()
+        let ci = ImageUtility.CGImageToCIImage(Input)
+        let filter = CIFilter.parallelogramTile()
+        // Edge pixels are repeated past the edges, so filters that sample around a point do not fade to transparent there.
+        filter.inputImage = ci.clampedToExtent()
+        filter.center = FilterOptionValues.Center(Options, Input)
+        filter.angle = Float(FilterOptionValues.Radians(Options, "ANGLE", DefaultDegrees: 0))
+        filter.acuteAngle = Float(FilterOptionValues.Radians(Options, "ACUTE", DefaultDegrees: 90))
+        filter.width = Float(FilterOptionValues.Number(Options, "WIDTH", Default: 100))
+        guard let Result = filter.outputImage?.cropped(to: ci.extent),
+              let Final = ImageUtility.CIImageToCGImage(Result) else
+        {
+            throw FilterException(Message: "Error from CIParallelogramTile.")
+        }
+        return Final
+    }
+}

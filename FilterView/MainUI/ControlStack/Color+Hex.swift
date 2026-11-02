@@ -13,7 +13,7 @@ extension Color
     /// - Returns: `nil` if the text is not a color.
     init?(Hex: String)
     {
-        guard let Parts = BackgroundClear.ParseColor(Hex) else
+        guard let Parts = FilterOptionValues.ParseColor(Hex) else
         {
             return nil
         }

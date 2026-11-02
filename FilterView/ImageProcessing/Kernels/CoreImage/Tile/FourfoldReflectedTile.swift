@@ -24,7 +24,8 @@ class CIFourFoldReflectedTile: ImageFilter
         try Task.checkCancellation()
         let ci = ImageUtility.CGImageToCIImage(Input)
         let filter = CIFilter.fourfoldReflectedTile()
-        filter.inputImage = ci
+        // Edge pixels are repeated past the edges, so filters that sample around a point do not fade to transparent there.
+        filter.inputImage = ci.clampedToExtent()
         filter.center = FilterOptionValues.Center(Options, Input)
         filter.angle = Float(FilterOptionValues.Radians(Options, "ANGLE", DefaultDegrees: 1.0 * 180.0 / .pi))
         filter.width = Float(FilterOptionValues.Number(Options, "WIDTH", Default: 240))

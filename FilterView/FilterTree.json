@@ -1,100 +1,161 @@
 {
-  "Name": "Filters",
-  "Children": [
-    {
-      "Name": "Infrastructure",
-      "Children": [
-        { "Name": "Passthrough", "Filter": "Passthrough" }
-      ]
-    },
-    {
-      "Name": "Metal",
-      "Children": [
+    "Name": "Filters",
+    "Children": [
         {
-          "Name": "Invert",
-          "Children": [
-            { "Name": "Invert All", "Filter": "Metal Invert" },
-            { "Name": "Invert Red", "Filter": "Channel Invert", "Options": { "RED": "" } },
-            { "Name": "Invert Green", "Filter": "Channel Invert", "Options": { "GREEN": "" } },
-            { "Name": "Invert Blue", "Filter": "Channel Invert", "Options": { "BLUE": "" } },
-            { "Name": "Invert Red + Green", "Filter": "Channel Invert", "Options": { "REDGREEN": "" } },
-            { "Name": "Invert Red + Blue", "Filter": "Channel Invert", "Options": { "REDBLUE": "" } },
-            { "Name": "Invert Green + Blue", "Filter": "Channel Invert", "Options": { "GREENBLUE": "" } }
-          ]
+            "Name": "Infrastructure",
+            "Children": [
+                { "Name": "Passthrough", "Filter": "Passthrough" }
+            ]
         },
         {
-          "Name": "Background",
-          "Children": [
-            {
-              "Name": "Clear Background",
-              "Filter": "BackgroundClear",
-              "Parameters": [
-                { "Key": "TARGET", "Title": "Target Color", "Type": "Color", "Default": "FFFFFFFF" },
-                { "Key": "SOURCE", "Title": "Replace With", "Type": "Color", "Default": "00000000" },
-                { "Key": "TOLERANCE", "Title": "Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" }
-              ]
-            }
-          ]
-        },
-        {
-          "Name": "Brightness",
-          "Children": [
-            {
-              "Name": "Brightness Invert",
-              "Filter": "Metal Bright Invert",
-              "Parameters": [
-                { "Key": "COLOR", "Title": "Show Color", "Type": "Toggle", "Default": "false" }
-              ]
-            }
-          ]
-        },
-        {
-          "Name": "Color Channel Swap",
-          "Filter": "Channel Swap",
-          "Parameters": [
-            {
-              "Key": "CHANNELS", "Title": "Channels", "Type": "Segments", "Default": "REDGREEN",
-              "Choices": [
-                { "Title": "Red + Green", "Value": "REDGREEN" },
-                { "Title": "Red + Blue", "Value": "REDBLUE" },
-                { "Title": "Green + Blue", "Value": "GREENBLUE" }
-              ]
-            }
-          ]
-        },
-        {
-          "Name": "Color Scale",
-          "Filter": "ColorScale",
-          "Parameters": [
-            {
-              "Key": "CHANNEL", "Title": "Scale On", "Type": "Choice", "Default": "GRAY",
-              "Choices": [
-                { "Title": "Gray", "Value": "GRAY" },
-                { "Title": "Red", "Value": "RED" },
-                { "Title": "Green", "Value": "GREEN" },
-                { "Title": "Blue", "Value": "BLUE" },
-                { "Title": "Cyan", "Value": "CYAN" },
-                { "Title": "Magenta", "Value": "MAGENTA" },
-                { "Title": "Yellow", "Value": "YELLOW" }
-              ]
-            },
-            { "Key": "COLOR", "Title": "Show in Color", "Type": "Toggle", "Default": "false" }
-          ]
-        },
-        {
-            "Name": "Distortion",
+            "Name": "Metal",
             "Children": [
                 {
-                    "Name": "Mirror",
-                    "Filter": "Mirror",
+                    "Name": "Invert",
+                    "Children": [
+                        { "Name": "Invert All", "Filter": "Metal Invert" },
+                        { "Name": "Invert Red", "Filter": "Channel Invert", "Options": { "RED": "" } },
+                        { "Name": "Invert Green", "Filter": "Channel Invert", "Options": { "GREEN": "" } },
+                        { "Name": "Invert Blue", "Filter": "Channel Invert", "Options": { "BLUE": "" } },
+                        { "Name": "Invert Red + Green", "Filter": "Channel Invert", "Options": { "REDGREEN": "" } },
+                        { "Name": "Invert Red + Blue", "Filter": "Channel Invert", "Options": { "REDBLUE": "" } },
+                        { "Name": "Invert Green + Blue", "Filter": "Channel Invert", "Options": { "GREENBLUE": "" } }
+                    ]
+                },
+                {
+                    "Name": "Background",
+                    "Children": [
+                        {
+                            "Name": "Clear Background",
+                            "Filter": "BackgroundClear",
+                            "Parameters": [
+                                { "Key": "TARGET", "Title": "Target Color", "Type": "Color", "Default": "FFFFFFFF" },
+                                { "Key": "SOURCE", "Title": "Replace With", "Type": "Color", "Default": "00000000" },
+                                { "Key": "TOLERANCE", "Title": "Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Brightness",
+                    "Children": [
+                        {
+                            "Name": "Brightness Invert",
+                            "Filter": "Metal Bright Invert",
+                            "Parameters": [
+                                { "Key": "COLOR", "Title": "Show Color", "Type": "Toggle", "Default": "false" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Color Channel Swap",
+                    "Filter": "Channel Swap",
                     "Parameters": [
                         {
-                            "Key": "HALF", "Title": "Mirror", "Type": "Segments", "Default": "TOPTOP",
+                            "Key": "CHANNELS", "Title": "Channels", "Type": "Segments", "Default": "REDGREEN",
                             "Choices": [
-                                { "Title": "Top", "Value": "TOPTOP" },
-                                { "Title": "Bottom", "Value": "BOTTOMBOTTOM" },
-                                { "Title": "Left", "Value": "LEFTLEFT" },
-                                { "Title": "Right", "Value": "RIGHTRIGHT" }
+                                { "Title": "Red + Green", "Value": "REDGREEN" },
+                                { "Title": "Red + Blue", "Value": "REDBLUE" },
+                                { "Title": "Green + Blue", "Value": "GREENBLUE" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Color Scale",
+                    "Filter": "ColorScale",
+                    "Parameters": [
+                        {
+                            "Key": "CHANNEL", "Title": "Scale On", "Type": "Choice", "Default": "GRAY",
+                            "Choices": [
+                                { "Title": "Gray", "Value": "GRAY" },
+                                { "Title": "Red", "Value": "RED" },
+                                { "Title": "Green", "Value": "GREEN" },
+                                { "Title": "Blue", "Value": "BLUE" },
+                                { "Title": "Cyan", "Value": "CYAN" },
+                                { "Title": "Magenta", "Value": "MAGENTA" },
+                                { "Title": "Yellow", "Value": "YELLOW" }
+                            ]
+                        },
+                        { "Key": "COLOR", "Title": "Show in Color", "Type": "Toggle", "Default": "false" }
+                    ]
+                },
+                {
+                    "Name": "Distortion",
+                    "Children": [
+                        {
+                            "Name": "Mirror",
+                            "Filter": "Mirror",
+                            "Parameters": [
+                                {
+                                    "Key": "HALF", "Title": "Mirror", "Type": "Segments", "Default": "TOPTOP",
+                                    "Choices": [
+                                        { "Title": "Top", "Value": "TOPTOP" },
+                                        { "Title": "Bottom", "Value": "BOTTOMBOTTOM" },
+                                        { "Title": "Left", "Value": "LEFTLEFT" },
+                                        { "Title": "Right", "Value": "RIGHTRIGHT" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Stylize",
+                    "Children": [
+                        { "Name": "Kuwahara Radius 2", "Filter": "Metal Kuwahara", "Options": { "RADIUS2": "" } },
+                        { "Name": "Kuwahara Radius 4", "Filter": "Metal Kuwahara", "Options": { "RADIUS4": "" } },
+                        { "Name": "Kuwahara Radius 6", "Filter": "Metal Kuwahara", "Options": { "RADIUS6": "" } },
+                        { "Name": "Kuwahara Radius 8", "Filter": "Metal Kuwahara", "Options": { "RADIUS8": "" } }
+                    ]
+                },
+                {
+                    "Name": "Edges",
+                    "Children": [
+                        { "Name": "Sobel", "Filter": "MPS Sobel" },
+                        { "Name": "Laplacian", "Filter": "MPS Laplacian" }
+                    ]
+                },
+                {
+                    "Name": "Contrast",
+                    "Children": [
+                        { "Name": "Histogram Equalization", "Filter": "MPS Histogram Equalization" }
+                    ]
+                },
+                {
+                    "Name": "Morphology",
+                    "Children": [
+                        { "Name": "Erode 3x3", "Filter": "MPS Erode", "Options": { "SIZE3": "" } },
+                        { "Name": "Erode 5x5", "Filter": "MPS Erode", "Options": { "SIZE5": "" } },
+                        { "Name": "Erode 7x7", "Filter": "MPS Erode", "Options": { "SIZE7": "" } },
+                        { "Name": "Dilate 3x3", "Filter": "MPS Dilate", "Options": { "SIZE3": "" } },
+                        { "Name": "Dilate 5x5", "Filter": "MPS Dilate", "Options": { "SIZE5": "" } },
+                        { "Name": "Dilate 7x7", "Filter": "MPS Dilate", "Options": { "SIZE7": "" } }
+                    ]
+                },
+                {
+                    "Name": "Pyramid",
+                    "Children": [
+                        { "Name": "Level 1 (1/2)", "Filter": "MPS Pyramid", "Options": { "LEVEL1": "" } },
+                        { "Name": "Level 2 (1/4)", "Filter": "MPS Pyramid", "Options": { "LEVEL2": "" } },
+                        { "Name": "Level 3 (1/8)", "Filter": "MPS Pyramid", "Options": { "LEVEL3": "" } },
+                        { "Name": "Level 4 (1/16)", "Filter": "MPS Pyramid", "Options": { "LEVEL4": "" } }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name": "CPU",
+            "Children": [
+                {
+                    "Name": "Monochrome",
+                    "Children": [
+                        {
+                            "Name": "Atkinson",
+                            "Filter": "Atkinson Dither",
+                            "Parameters": [
+                                { "Key": "OPTIMIZED", "Title": "Optimized", "Type": "Toggle", "Default": "true" }
                             ]
                         }
                     ]
@@ -102,282 +163,575 @@
             ]
         },
         {
-          "Name": "Stylize",
-          "Children": [
-            { "Name": "Kuwahara Radius 2", "Filter": "Metal Kuwahara", "Options": { "RADIUS2": "" } },
-            { "Name": "Kuwahara Radius 4", "Filter": "Metal Kuwahara", "Options": { "RADIUS4": "" } },
-            { "Name": "Kuwahara Radius 6", "Filter": "Metal Kuwahara", "Options": { "RADIUS6": "" } },
-            { "Name": "Kuwahara Radius 8", "Filter": "Metal Kuwahara", "Options": { "RADIUS8": "" } }
-          ]
-        },
-        {
-          "Name": "Edges",
-          "Children": [
-            { "Name": "Sobel", "Filter": "MPS Sobel" },
-            { "Name": "Laplacian", "Filter": "MPS Laplacian" }
-          ]
-        },
-        {
-          "Name": "Contrast",
-          "Children": [
-            { "Name": "Histogram Equalization", "Filter": "MPS Histogram Equalization" }
-          ]
-        },
-        {
-          "Name": "Morphology",
-          "Children": [
-            { "Name": "Erode 3x3", "Filter": "MPS Erode", "Options": { "SIZE3": "" } },
-            { "Name": "Erode 5x5", "Filter": "MPS Erode", "Options": { "SIZE5": "" } },
-            { "Name": "Erode 7x7", "Filter": "MPS Erode", "Options": { "SIZE7": "" } },
-            { "Name": "Dilate 3x3", "Filter": "MPS Dilate", "Options": { "SIZE3": "" } },
-            { "Name": "Dilate 5x5", "Filter": "MPS Dilate", "Options": { "SIZE5": "" } },
-            { "Name": "Dilate 7x7", "Filter": "MPS Dilate", "Options": { "SIZE7": "" } }
-          ]
-        },
-        {
-          "Name": "Pyramid",
-          "Children": [
-            { "Name": "Level 1 (1/2)", "Filter": "MPS Pyramid", "Options": { "LEVEL1": "" } },
-            { "Name": "Level 2 (1/4)", "Filter": "MPS Pyramid", "Options": { "LEVEL2": "" } },
-            { "Name": "Level 3 (1/8)", "Filter": "MPS Pyramid", "Options": { "LEVEL3": "" } },
-            { "Name": "Level 4 (1/16)", "Filter": "MPS Pyramid", "Options": { "LEVEL4": "" } }
-          ]
-        }
-      ]
-    },
-    {
-        "Name": "CPU",
-        "Children": [
-            {
-                "Name": "Monochrome",
-                "Children": [
-                    {
-                        "Name": "Atkinson",
-                        "Filter": "Atkinson Dither",
-                        "Parameters": [
-                            { "Key": "OPTIMIZED", "Title": "Optimized", "Type": "Toggle", "Default": "true" }
-                        ]
-                    }
-                ]
-            }
-            ]
-    },
-    {
-      "Name": "Core Image",
-      "Children": [
-        {
-          "Name": "Monochrome",
-          "Children": [
-            { "Name": "Grayscale", "Filter": "CI Grayscale" },
-            { "Name": "Noir", "Filter": "CI Noir" },
-            { "Name": "Max Component", "Filter": "CI MaxComponent" },
-            { "Name": "Min Component", "Filter": "CI MinComponent" }
-          ]
-        },
-        {
-          "Name": "Halftone",
-          "Children": [
-            {
-                "Name": "CMYK Halftone",
-                "Filter": "CI CMYKHalftone",
-                "Parameters": [
-                    { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                    { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
-                    { "Key": "GCR", "Title": "Gray Replacement", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
-                    { "Key": "UCR", "Title": "Under Color Removal", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" },
-                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                ]
-            },
-            {
-                "Name": "Dot Screen",
-                "Filter": "CI DotScreen",
-                "Parameters": [
-                    { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
-                    { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
-                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.85" },
-                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                ]
-            },
-            {
-                "Name": "Hatched Screen",
-                "Filter": "CI HatchedScreen",
-                "Parameters": [
-                    { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "90" },
-                    { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
-                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.7" },
-                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                ]
-            },
-            {
-                "Name": "Line Screen",
-                "Filter": "CI LineScreen",
-                "Parameters": [
-                    { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "90" },
-                    { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
-                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.9" },
-                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                ]
-            },
-            {
-                "Name": "Circular Screen",
-                "Filter": "CI CircularScreen",
-                "Parameters": [
-                    { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
-                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.9" },
-                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                ]
-            }
-          ]
-        },
-        {
-            "Name": "Tile",
+            "Name": "Core Image",
             "Children": [
                 {
-                    "Name": "Kaleidoscope",
-                    "Filter": "CI Kaleidoscope",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
-                        { "Key": "COUNT", "Title": "Count", "Type": "Slider", "Min": 1, "Max": 24, "Step": 1, "Default": "6" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                    "Name": "Monochrome",
+                    "Children": [
+                        { "Name": "Grayscale", "Filter": "CI Grayscale" },
+                        { "Name": "Noir", "Filter": "CI Noir" },
+                        { "Name": "Max Component", "Filter": "CI MaxComponent" },
+                        { "Name": "Min Component", "Filter": "CI MinComponent" }
                     ]
                 },
                 {
-                    "Name": "Triangle Tile",
-                    "Filter": "CI Triangle Tile",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                    "Name": "Color",
+                    "Children": [
+                        {
+                            "Name": "Color Clamp",
+                            "Filter": "CI Color Clamp",
+                            "Parameters": [
+                                { "Key": "MINR", "Title": "Min Red", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "MING", "Title": "Min Green", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "MINB", "Title": "Min Blue", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "MINA", "Title": "Min Alpha", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "MAXR", "Title": "Max Red", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                { "Key": "MAXG", "Title": "Max Green", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                { "Key": "MAXB", "Title": "Max Blue", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                { "Key": "MAXA", "Title": "Max Alpha", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" }
+                            ]
+                        },
+                        {
+                            "Name": "Color Controls",
+                            "Filter": "CI Color Controls",
+                            "Parameters": [
+                                { "Key": "BRIGHTNESS", "Title": "Brightness", "Type": "Slider", "Min": -1, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "CONTRAST", "Title": "Contrast", "Type": "Slider", "Min": 0, "Max": 4, "Step": 0.01, "Default": "1" },
+                                { "Key": "SATURATION", "Title": "Saturation", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.01, "Default": "1" }
+                            ]
+                        },
+                        {
+                            "Name": "Color Threshold",
+                            "Filter": "CI Color Threshold",
+                            "Parameters": [
+                                { "Key": "THRESHOLD", "Title": "Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.5" }
+                            ]
+                        },
+                        {
+                            "Name": "Color Threshold Otsu",
+                            "Filter": "CI Color Threshold Otsu"
+                        },
+                        {
+                            "Name": "Linear to sRGB Tone curve",
+                            "Filter": "CI Linear To sRGB Tone Curve"
+                        },
+                        {
+                            "Name": "sRGB Tone curve to Linear",
+                            "Filter": "CI sRGB Tone Curve to Linear"
+                        },
+                        {
+                            "Name": "Vibrance",
+                            "Filter": "CI Vibrance",
+                            "Parameters": [
+                                { "Key": "AMOUNT", "Title": "Amount", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "2" }
+                            ]
+                        },
+                        {
+                            "Name": "White Point",
+                            "Filter": "CI WhitePoint",
+                            "Parameters": [
+                                { "Key": "WPCOLOR", "Title": "White Point Color", "Type": "Color", "Default": "FFFFFFFF" }
+                            ]
+                        },
+                        {
+                            "Name": "Posterize",
+                            "Filter": "CI Color Posterize",
+                            "Parameters": [
+                                { "Key": "LEVELS", "Title": "Color Levels", "Type": "Slider", "Min": 1, "Max": 16, "Step": 1, "Default": "8" }
+                            ]
+                        },
+                        {
+                        "Name": "Convert RGB to LAB",
+                        "Filter": "CI Convert RGB to LAB"
+                        },
+                        {
+                        "Name": "Convert LAB to RGB",
+                        "Filter": "CI Convert LAB to RGB"
+                        }
                     ]
                 },
-                {
-                    "Name": "Four-Fold Tile",
-                    "Filter": "CI Fourfold Reflected Tile",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "240" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                    ]
-                },
-                {
-                    "Name": "Six-Fold Tile",
-                    "Filter": "CI Sixfold Reflected Tile",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                    ]
-                },
-                {
-                    "Name": "Eight-Fold Tile",
-                    "Filter": "CI Eightfold Reflected Tile",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "240" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                    ]
-                },
-                {
-                    "Name": "Twelve-Fold Tile",
-                    "Filter": "CI Twelvefold Reflected Tile",
-                    "Parameters": [
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
-                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                        {
+                            "Name": "Halftone",
+                            "Children": [
+                                {
+                                    "Name": "CMYK Halftone",
+                                    "Filter": "CI CMYKHalftone",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
+                                        { "Key": "GCR", "Title": "Gray Replacement", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                        { "Key": "UCR", "Title": "Under Color Removal", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Dot Screen",
+                                    "Filter": "CI DotScreen",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
+                                        { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.85" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Hatched Screen",
+                                    "Filter": "CI HatchedScreen",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "90" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
+                                        { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.7" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Line Screen",
+                                    "Filter": "CI LineScreen",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "90" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
+                                        { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.9" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Circular Screen",
+                                    "Filter": "CI CircularScreen",
+                                    "Parameters": [
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 2, "Max": 50, "Step": 1, "Default": "4" },
+                                        { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.9" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Name": "Tile",
+                            "Children": [
+                                {
+                                    "Name": "Kaleidoscope",
+                                    "Filter": "CI Kaleidoscope",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "COUNT", "Title": "Count", "Type": "Slider", "Min": 1, "Max": 24, "Step": 1, "Default": "6" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Triangle Tile",
+                                    "Filter": "CI Triangle Tile",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Four-Fold Tile",
+                                    "Filter": "CI Fourfold Reflected Tile",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "240" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Six-Fold Tile",
+                                    "Filter": "CI Sixfold Reflected Tile",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Eight-Fold Tile",
+                                    "Filter": "CI Eightfold Reflected Tile",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "240" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Twelve-Fold Tile",
+                                    "Filter": "CI Twelvefold Reflected Tile",
+                                    "Parameters": [
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "57.3" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "120" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Glide Reflected Tile",
+                                    "Filter": "CI Glide Reflected Tile",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "70" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Op Tile",
+                                    "Filter": "CI Op Tile",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": 0.1, "Max": 10, "Step": 0.1, "Default": "2.8" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "65" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Parallelogram Tile",
+                                    "Filter": "CI Parallelogram Tile",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "ACUTE", "Title": "Acute Angle", "Type": "Slider", "Min": 1, "Max": 179, "Step": 1, "Default": "90" },
+                                        { "Key": "WIDTH", "Title": "Width", "Type": "Slider", "Min": 1, "Max": 500, "Step": 1, "Default": "100" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Perspective Tile",
+                                    "Filter": "CI Perspective Tile",
+                                    "Parameters": [
+                                        { "Key": "TLX", "Title": "Top Left X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "TLY", "Title": "Top Left Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "TRX", "Title": "Top Right X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "80" },
+                                        { "Key": "TRY", "Title": "Top Right Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "BRX", "Title": "Bottom Right X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "80" },
+                                        { "Key": "BRY", "Title": "Bottom Right Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "80" },
+                                        { "Key": "BLX", "Title": "Bottom Left X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "BLY", "Title": "Bottom Left Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "80" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Name": "Stylize",
+                            "Children": [
+                                {
+                                    "Name": "Dither",
+                                    "Filter": "CI Dither",
+                                    "Parameters": [
+                                        { "Key": "INTENSITY", "Title": "Intensity", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.05, "Default": "0.5" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Line Overlay",
+                                    "Filter": "CI LineOverlay",
+                                    "Parameters": [
+                                        { "Key": "NOISE", "Title": "Noise Level", "Type": "Slider", "Min": 0, "Max": 0.1, "Step": 0.005, "Default": "0.07" },
+                                        { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.05, "Default": "0.85" },
+                                        { "Key": "EDGE", "Title": "Edge Intensity", "Type": "Slider", "Min": 0, "Max": 200, "Step": 1, "Default": "1" },
+                                        { "Key": "THRESHOLD", "Title": "Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" },
+                                        { "Key": "CONTRAST", "Title": "Contrast", "Type": "Slider", "Min": 0.25, "Max": 200, "Step": 0.25, "Default": "50" }
+                                    ]
+                                },
+                                { "Name": "Comic Effect", "Filter": "CI ComicEffect" },
+                                {
+                                    "Name": "Canny Edge Detector",
+                                    "Filter": "CI Canny Edge Detector",
+                                    "Parameters": [
+                                        { "Key": "SIGMA", "Title": "Blur Sigma", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "1.6" },
+                                        { "Key": "PERCEPTUAL", "Title": "Perceptual", "Type": "Toggle", "Default": "false" },
+                                        { "Key": "HIGH", "Title": "High Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.05" },
+                                        { "Key": "LOW", "Title": "Low Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.02" },
+                                        { "Key": "PASSES", "Title": "Hysteresis Passes", "Type": "Slider", "Min": 1, "Max": 20, "Step": 1, "Default": "1" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Crystallize",
+                                    "Filter": "CI Crystallize",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Depth of Field",
+                                    "Filter": "CI Depth Of Field",
+                                    "Parameters": [
+                                        { "Key": "P0X", "Title": "Point 1 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "25" },
+                                        { "Key": "P0Y", "Title": "Point 1 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "P1X", "Title": "Point 2 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "75" },
+                                        { "Key": "P1Y", "Title": "Point 2 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Blur Radius", "Type": "Slider", "Min": 0, "Max": 50, "Step": 0.5, "Default": "6" },
+                                        { "Key": "SATURATION", "Title": "Saturation", "Type": "Slider", "Min": 0, "Max": 3, "Step": 0.05, "Default": "1.5" },
+                                        { "Key": "MASKRADIUS", "Title": "Mask Radius", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "2.5" },
+                                        { "Key": "MASKINTENSITY", "Title": "Mask Intensity", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.05, "Default": "0.5" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Edges",
+                                    "Filter": "CI Edges",
+                                    "Parameters": [
+                                        { "Key": "INTENSITY", "Title": "Intensity", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "1" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Edge Work",
+                                    "Filter": "CI Edge Work",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Line Radius", "Type": "Slider", "Min": 0, "Max": 20, "Step": 0.5, "Default": "3" }
+                                    ]
+                                },
+                                { "Name": "Gabor Gradients", "Filter": "CI Gabor Gradients" },
+                                {
+                                    "Name": "Gloom",
+                                    "Filter": "CI Gloom",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10" },
+                                        { "Key": "INTENSITY", "Title": "Intensity", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.5" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Hexagonal Pixellate",
+                                    "Filter": "CI Hexagonal Pixellate",
+                                    "Parameters": [
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "8" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Highlight Shadow Adjust",
+                                    "Filter": "CI Highlight Shadow Adjust",
+                                    "Parameters": [
+                                        { "Key": "HIGHLIGHT", "Title": "Highlight Amount", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                        { "Key": "SHADOW", "Title": "Shadow Amount", "Type": "Slider", "Min": -1, "Max": 1, "Step": 0.01, "Default": "0" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "0" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Pixellate",
+                                    "Filter": "CI Pixellate",
+                                    "Parameters": [
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "8" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Pointillize",
+                                    "Filter": "CI Pointillize",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "20" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                },
+                                { "Name": "Sobel Gradients", "Filter": "CI Sobel Gradients" },
+                                {
+                                    "Name": "Spot Color",
+                                    "Filter": "CI Spot Color",
+                                    "Parameters": [
+                                        { "Key": "CENTER1", "Title": "Spot 1 Color", "Type": "Color", "Default": "FF0000FF" },
+                                        { "Key": "REPLACE1", "Title": "Spot 1 Replacement", "Type": "Color", "Default": "FF0000FF" },
+                                        { "Key": "CLOSENESS1", "Title": "Spot 1 Closeness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.22" },
+                                        { "Key": "CONTRAST1", "Title": "Spot 1 Contrast", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.01, "Default": "0.98" },
+                                        { "Key": "CENTER2", "Title": "Spot 2 Color", "Type": "Color", "Default": "00FF00FF" },
+                                        { "Key": "REPLACE2", "Title": "Spot 2 Replacement", "Type": "Color", "Default": "00FF00FF" },
+                                        { "Key": "CLOSENESS2", "Title": "Spot 2 Closeness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.22" },
+                                        { "Key": "CONTRAST2", "Title": "Spot 2 Contrast", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.01, "Default": "0.98" },
+                                        { "Key": "CENTER3", "Title": "Spot 3 Color", "Type": "Color", "Default": "0000FFFF" },
+                                        { "Key": "REPLACE3", "Title": "Spot 3 Replacement", "Type": "Color", "Default": "0000FFFF" },
+                                        { "Key": "CLOSENESS3", "Title": "Spot 3 Closeness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.22" },
+                                        { "Key": "CONTRAST3", "Title": "Spot 3 Contrast", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.01, "Default": "0.98" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Name": "Generators",
+                            "Children": [
+                            {
+                                "Name": "Barcodes",
+                                "Children": [
+                                {
+                                    "Name": "Aztec Code",
+                                    "Filter": "CI Aztec Code Generator",
+                                    "Parameters": [
+                                        { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                        { "Key": "CORRECTION", "Title": "Correction %", "Type": "Slider", "Min": 5, "Max": 95, "Step": 1, "Default": "23" },
+                                        { "Key": "LAYERS", "Title": "Layers (0 = auto)", "Type": "Slider", "Min": 0, "Max": 32, "Step": 1, "Default": "0" },
+                                        { "Key": "COMPACT", "Title": "Compact Style", "Type": "Toggle", "Default": "false" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Barcode (QR descriptor)",
+                                    "Filter": "CI Barcode Generator",
+                                    "Parameters": [
+                                        { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                        { "Key": "LEVEL", "Title": "Error Correction", "Type": "Segments", "Default": "M", "Choices": [{ "Title": "L", "Value": "L" }, { "Title": "M", "Value": "M" }, { "Title": "Q", "Value": "Q" }, { "Title": "H", "Value": "H" }] },
+                                        { "Key": "VERSION", "Title": "Version (0 = auto)", "Type": "Slider", "Min": 0, "Max": 40, "Step": 1, "Default": "0" },
+                                        { "Key": "MASK", "Title": "Mask Pattern", "Type": "Slider", "Min": 0, "Max": 7, "Step": 1, "Default": "0" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Code 128",
+                                    "Filter": "CI Code 128 Barcode Generator",
+                                    "Parameters": [
+                                        { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                        { "Key": "QUIET", "Title": "Quiet Space", "Type": "Slider", "Min": 0, "Max": 20, "Step": 1, "Default": "7" },
+                                        { "Key": "HEIGHT", "Title": "Bar Height", "Type": "Slider", "Min": 1, "Max": 200, "Step": 1, "Default": "32" }
+                                    ]
+                                },
+                                {
+                                    "Name": "PDF417",
+                                    "Filter": "CI PDF417 Barcode Generator",
+                                    "Parameters": [
+                                        { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                        { "Key": "COLUMNS", "Title": "Columns (0 = auto)", "Type": "Slider", "Min": 0, "Max": 30, "Step": 1, "Default": "0" },
+                                        { "Key": "ROWS", "Title": "Rows (0 = auto)", "Type": "Slider", "Min": 0, "Max": 90, "Step": 1, "Default": "0" },
+                                        { "Key": "CORRECTION", "Title": "Correction Level", "Type": "Slider", "Min": 0, "Max": 8, "Step": 1, "Default": "2" },
+                                        { "Key": "ASPECT", "Title": "Aspect (0 = auto)", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "0" },
+                                        { "Key": "COMPACTION", "Title": "Compaction", "Type": "Choice", "Default": "0", "Choices": [{ "Title": "Auto", "Value": "0" }, { "Title": "Numeric", "Value": "1" }, { "Title": "Text", "Value": "2" }, { "Title": "Byte", "Value": "3" }] },
+                                        { "Key": "COMPACT", "Title": "Compact Style", "Type": "Toggle", "Default": "false" }
+                                    ]
+                                },
+                                {
+                                    "Name": "QR Code",
+                                    "Filter": "CI QR Code Generator",
+                                    "Parameters": [
+                                        { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                        { "Key": "LEVEL", "Title": "Error Correction", "Type": "Segments", "Default": "M", "Choices": [{ "Title": "L", "Value": "L" }, { "Title": "M", "Value": "M" }, { "Title": "Q", "Value": "Q" }, { "Title": "H", "Value": "H" }] }
+                                    ]
+                                }
+                                ]
+                            },
+                            {
+                                "Name": "Lenticular Halo",
+                                "Filter": "CI Lenticular Halo Generator",
+                                "Parameters": [
+                                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "COLOR", "Title": "Color", "Type": "Color", "Default": "FFE6CCFF" },
+                                    { "Key": "RADIUS", "Title": "Halo Radius", "Type": "Slider", "Min": 0, "Max": 1000, "Step": 1, "Default": "70" },
+                                    { "Key": "WIDTH", "Title": "Halo Width", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "87" },
+                                    { "Key": "OVERLAP", "Title": "Halo Overlap", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.77" },
+                                    { "Key": "STRENGTH", "Title": "Beam Strength", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.01, "Default": "0.5" },
+                                    { "Key": "CONTRAST", "Title": "Beam Contrast", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.01, "Default": "1" },
+                                    { "Key": "TIME", "Title": "Time", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                    { "Key": "OVERIMAGE", "Title": "Over Image", "Type": "Toggle", "Default": "false" }
+                                ]
+                            },
+                            { "Name": "Random", "Filter": "CI Random Generator" },
+                            {
+                                "Name": "Star Shine",
+                                "Filter": "CI Star Shine Generator",
+                                "Parameters": [
+                                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "COLOR", "Title": "Color", "Type": "Color", "Default": "FFCC99FF" },
+                                    { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 300, "Step": 1, "Default": "50" },
+                                    { "Key": "CROSSSCALE", "Title": "Cross Scale", "Type": "Slider", "Min": 0, "Max": 100, "Step": 0.5, "Default": "15" },
+                                    { "Key": "CROSSANGLE", "Title": "Cross Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "34.4" },
+                                    { "Key": "CROSSOPACITY", "Title": "Cross Opacity", "Type": "Slider", "Min": -8, "Max": 0, "Step": 0.1, "Default": "-2" },
+                                    { "Key": "CROSSWIDTH", "Title": "Cross Width", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.1, "Default": "2.5" },
+                                    { "Key": "EPSILON", "Title": "Epsilon", "Type": "Slider", "Min": -8, "Max": 0, "Step": 0.1, "Default": "-2" },
+                                    { "Key": "OVERIMAGE", "Title": "Over Image", "Type": "Toggle", "Default": "false" }
+                                ]
+                            },
+                            {
+                                "Name": "Stripes",
+                                "Filter": "CI Stripes Generator",
+                                "Parameters": [
+                                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "COLOR0", "Title": "Color 1", "Type": "Color", "Default": "000000FF" },
+                                    { "Key": "COLOR1", "Title": "Color 2", "Type": "Color", "Default": "FFFFFFFF" },
+                                    { "Key": "WIDTH", "Title": "Stripe Width", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "80" },
+                                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" }
+                                ]
+                            },
+                            {
+                                "Name": "Sunbeams",
+                                "Filter": "CI Sunbeams Generator",
+                                "Parameters": [
+                                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "COLOR", "Title": "Color", "Type": "Color", "Default": "FF8000FF" },
+                                    { "Key": "SUNRADIUS", "Title": "Sun Radius", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "40" },
+                                    { "Key": "MAXSTRIATION", "Title": "Beam Reach", "Type": "Slider", "Min": 0, "Max": 10, "Step": 0.01, "Default": "2.58" },
+                                    { "Key": "STRENGTH", "Title": "Beam Strength", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.01, "Default": "0.5" },
+                                    { "Key": "CONTRAST", "Title": "Beam Contrast", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.025, "Default": "1.375" },
+                                    { "Key": "TIME", "Title": "Time", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                    { "Key": "OVERIMAGE", "Title": "Over Image", "Type": "Toggle", "Default": "false" }
+                                ]
+                            }
+                            ]
+                        },
+                        {
+                            "Name": "Blur",
+                            "Children": [
+                                {
+                                    "Name": "Gaussian Blur",
+                                    "Filter": "CI Gaussian Blur",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
+                                    ]
+                                },
+                                {
+                                    "Name": "Median",
+                                    "Filter": "CI Median"
+                                },
+                                {
+                                    "Name": "Morphology Gradient",
+                                    "Filter": "CI MorphologyGradient",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
+                                    ]
+                                },
+                                {
+                                    "Name": "Morphology Maximum",
+                                    "Filter": "CI MorphologyMaximum",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
+                                    ]
+                                },
+                                {
+                                    "Name": "Morphology Minimum",
+                                    "Filter": "CI MorphologyMinimum",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
+                                    ]
+                                },
+                                {
+                                    "Name": "Motion Blur",
+                                    "Filter": "CI Motion Blur",
+                                    "Parameters": [
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20"},
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0"}
+                                    ]
+                                },
+                                {
+                                    "Name": "Zoom Blur",
+                                    "Filter": "CI Zoom Blur",
+                                    "Parameters": [
+                                        { "Key": "AMOUNT", "Title": "Amount", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"},
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                                    ]
+                                }
+                            ]
+                        }
                     ]
                 }
             ]
-        },
-        {
-          "Name": "Stylize",
-          "Children": [
-            {
-                "Name": "Dither",
-                "Filter": "CI Dither",
-                "Parameters": [
-                    { "Key": "INTENSITY", "Title": "Intensity", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.05, "Default": "0.5" }
-                ]
-            },
-            {
-                "Name": "Line Overlay",
-                "Filter": "CI LineOverlay",
-                "Parameters": [
-                    { "Key": "NOISE", "Title": "Noise Level", "Type": "Slider", "Min": 0, "Max": 0.1, "Step": 0.005, "Default": "0.07" },
-                    { "Key": "SHARPNESS", "Title": "Sharpness", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.05, "Default": "0.85" },
-                    { "Key": "EDGE", "Title": "Edge Intensity", "Type": "Slider", "Min": 0, "Max": 200, "Step": 1, "Default": "1" },
-                    { "Key": "THRESHOLD", "Title": "Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" },
-                    { "Key": "CONTRAST", "Title": "Contrast", "Type": "Slider", "Min": 0.25, "Max": 200, "Step": 0.25, "Default": "50" }
-                ]
-            },
-            { "Name": "Comic Effect", "Filter": "CI ComicEffect" }
-          ]
-        },
-        {
-            "Name": "Blur",
-            "Children": [
-                {
-                    "Name": "Gaussian Blur",
-                    "Filter": "CI Gaussian Blur",
-                    "Parameters": [
-                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
-                    ]
-                },
-                {
-                    "Name": "Median",
-                    "Filter": "CI Median"
-                },
-                {
-                    "Name": "Morphology Gradient",
-                    "Filter": "CI MorphologyGradient",
-                    "Parameters": [
-                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
-                    ]
-                },
-                {
-                    "Name": "Morphology Maximum",
-                    "Filter": "CI MorphologyMaximum",
-                    "Parameters": [
-                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
-                    ]
-                },
-                {
-                    "Name": "Morphology Minimum",
-                    "Filter": "CI MorphologyMinimum",
-                    "Parameters": [
-                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
-                    ]
-                },
-                {
-                    "Name": "Motion Blur",
-                    "Filter": "CI Motion Blur",
-                    "Parameters": [
-                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20"},
-                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0"}
-                    ]
-                },
-                {
-                    "Name": "Zoom Blur",
-                    "Filter": "CI Zoom Blur",
-                    "Parameters": [
-                        { "Key": "AMOUNT", "Title": "Amount", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"},
-                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
-                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
-                    ]
-                }
-            ]
         }
-      ]
-    }
-  ]
-}

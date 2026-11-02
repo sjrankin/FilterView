@@ -21,7 +21,7 @@ struct FilterParameter: Codable, Hashable, Identifiable, Sendable
     let Kind: Kinds
 
     /// The value used until the user changes it. Slider: a number. Toggle: `true` or `false`. Color: `RRGGBB` or `RRGGBBAA`.
-    /// Choice and Segments: the `Value` of one of the choices.
+    /// Choice and Segments: the `Value` of one of the choices. Text: the text.
     let Default: String
 
     /// Lowest value of a slider.
@@ -49,6 +49,7 @@ struct FilterParameter: Codable, Hashable, Identifiable, Sendable
         case Color
         case Choice
         case Segments
+        case Text
     }
 
     enum CodingKeys: String, CodingKey
