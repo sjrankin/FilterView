@@ -36,10 +36,34 @@ struct InputControlBar: View
     /// Called when the user taps Stop. Must finish the recording and set `ShowMovieExporter`.
     var OnStop: () async -> Void
     @State private var ShowImporter = false
+    /// The width this bar was given. Decides whether it needs two rows.
+    @State private var BarWidth: CGFloat = 1000
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var SizeClass
+    #endif
+
+    /// True on a narrow screen (iPhone in portrait).
+    private var IsCompact: Bool
+    {
+        #if os(iOS)
+        return SizeClass == .compact
+        #else
+        return false
+        #endif
+    }
+
+    /// Two rows (the picker above, the buttons below) when everything does not fit on one: on a narrow screen, or with Video chosen
+    /// (it adds the frame rate slider and Record) in anything less than a wide window. `AnyLayout` keeps the views' identity when
+    /// this changes, so the file dialogs and the live video are not restarted by a rotation.
+    private var BarLayout: AnyLayout
+    {
+        let Stacked = IsCompact || (InputSource == .Video && BarWidth < 700)
+        return Stacked ? AnyLayout(VStackLayout(alignment: .leading)) : AnyLayout(HStackLayout())
+    }
 
     var body: some View
     {
-        HStack
+        BarLayout
         {
             Picker("", selection: $InputSource)
             {
@@ -50,6 +74,7 @@ struct InputControlBar: View
                 }
             }
             .pickerStyle(.segmented)
+            .frame(minWidth: 220)
             // The video save dialog is attached here, not to the Save button, because a view can only present one file exporter
             // and Save has the image one. This view is also always present, so the dialog can open when a recording ends
             // because the input was changed.
@@ -68,92 +93,108 @@ struct InputControlBar: View
                         print("Saving the video failed: \(Failure)")
                 }
             }
-            if InputSource == .Video
+            HStack
             {
-                Text("Max FPS: \(MaxFPS, format: .number.precision(.fractionLength(0)))")
-                    .fixedSize()
-                Slider(value: $MaxFPS, in: 1 ... 60, step: 1)
-                    .frame(maxWidth: 160)
-                if IsRecording
+                if InputSource == .Video
                 {
-                    Button("Stop", systemImage: "stop.circle")
+                    Text("FPS: \(MaxFPS, format: .number.precision(.fractionLength(0)))")
+                        .fixedSize()
+                    Slider(value: $MaxFPS, in: 1 ... 60, step: 1)
+                        .frame(minWidth: 100, maxWidth: 200)
+                    if IsRecording
                     {
-                        Task
+                        Button("Stop", systemImage: "stop.circle")
                         {
-                            await OnStop()
+                            Task
+                            {
+                                await OnStop()
+                            }
+                        }
+                        .fixedSize()
+                    }
+                    else
+                    {
+                        Button("Record", systemImage: "record.circle")
+                        {
+                            OnRecord()
+                        }
+                        .foregroundStyle(.red)
+                        .fixedSize()
+                    }
+                }
+                Spacer()
+                if InputSource == .Image
+                {
+                    Button("Load")
+                    {
+                        ShowImporter = true
+                    }
+                    .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image])
+                    {
+                        Result in
+                        switch Result
+                        {
+                            case .success(let Selected):
+                                OnLoad(Selected)
+
+                            case .failure(let Failure):
+                                print("Load failed: \(Failure)")
                         }
                     }
                 }
-                else
+                if InputSource == .Camera
                 {
-                    Button("Record", systemImage: "record.circle")
+                    Button("Take Photo", systemImage: "camera")
                     {
-                        OnRecord()
+                        OnTakePhoto()
                     }
-                    .foregroundStyle(.red)
+                    .fixedSize()
+                    #if os(iOS)
+                    .disabled(!CameraPicker.IsAvailable)
+                    #endif
                 }
-            }
-            Spacer()
-            if InputSource == .Image
-            {
-                Button("Load")
+                Button("Save")
                 {
-                    ShowImporter = true
+                    if InputSource == .Video
+                    {
+                        // Save the last recording. There is nothing to save until one has finished.
+                        ShowMovieExporter = true
+                    }
+                    else
+                    {
+                        Task
+                        {
+                            await OnSave()
+                        }
+                    }
                 }
-                .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image])
+                .disabled(InputSource == .Video && (IsRecording || Movie == nil))
+                .fileExporter(isPresented: $ShowExporter,
+                              document: ExportDocument,
+                              contentType: .png,
+                              defaultFilename: "Filtered")
                 {
                     Result in
                     switch Result
                     {
-                        case .success(let Selected):
-                            OnLoad(Selected)
+                        case .success(let Saved):
+                            print("Saved to \(Saved)")
 
                         case .failure(let Failure):
-                            print("Load failed: \(Failure)")
+                            print("Save failed: \(Failure)")
                     }
                 }
             }
-            if InputSource == .Camera
-            {
-                Button("Take Photo", systemImage: "camera")
-                {
-                    OnTakePhoto()
-                }
-                #if os(iOS)
-                .disabled(!CameraPicker.IsAvailable)
-                #endif
-            }
-            Button("Save")
-            {
-                if InputSource == .Video
-                {
-                    // Save the last recording. There is nothing to save until one has finished.
-                    ShowMovieExporter = true
-                }
-                else
-                {
-                    Task
-                    {
-                        await OnSave()
-                    }
-                }
-            }
-            .disabled(InputSource == .Video && (IsRecording || Movie == nil))
-            .fileExporter(isPresented: $ShowExporter,
-                          document: ExportDocument,
-                          contentType: .png,
-                          defaultFilename: "Filtered")
-            {
-                Result in
-                switch Result
-                {
-                    case .success(let Saved):
-                        print("Saved to \(Saved)")
-
-                    case .failure(let Failure):
-                        print("Save failed: \(Failure)")
-                }
-            }
+        }
+        // The full width offered, whatever the contents need, so the width measured below does not depend on the layout chosen.
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self)
+        {
+            $0.size.width
+        }
+        action:
+        {
+            BarWidth = $0
         }
     }
 }

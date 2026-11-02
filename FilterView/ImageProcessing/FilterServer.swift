@@ -56,6 +56,8 @@ class FilterServer
         Register(CIEightFoldReflectedTile.FilterName, CIEightFoldReflectedTile())
         Register(CITwelveFoldReflectedTile.FilterName, CITwelveFoldReflectedTile())
         Register(AtkinsonDither.FilterName, AtkinsonDither())
+        Register(ColorScale.FilterName, ColorScale())
+        Register(ColorScaleColor.FilterName, ColorScaleColor())
     }
 
     /// Adds a filter, remembering the order in which it was added.

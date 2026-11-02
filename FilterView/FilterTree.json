@@ -38,6 +38,24 @@
           ]
         },
         {
+            "Name": "Color Scale",
+            "Children": [
+                { "Name": "Grayscale (mean)", "Filter": "ColorScale", "Options": { "GRAY": "" } },
+                { "Name": "Redscale", "Filter": "ColorScale", "Options": { "RED": "" } },
+                { "Name": "Redscale + Color", "Filter": "ColorScaleColor", "Options": { "RED": "" } },
+                { "Name": "Greenscale", "Filter": "ColorScale", "Options": { "GREEN": "" } },
+                { "Name": "Greenscale + Color", "Filter": "ColorScaleColor", "Options": { "GREEN": "" } },
+                { "Name": "Bluescale", "Filter": "ColorScale", "Options": { "BLUE": "" } },
+                { "Name": "Bluescale + Color", "Filter": "ColorScaleColor", "Options": { "BLUE": "" } },
+                { "Name": "Cyanscale", "Filter": "ColorScale", "Options": { "CYAN": "" } },
+                { "Name": "Cyanscale + Color", "Filter": "ColorScaleColor", "Options": { "CYAN": "" } },
+                { "Name": "Magentascale", "Filter": "ColorScale", "Options": { "MAGENTA": "" } },
+                { "Name": "Magentascale + Color", "Filter": "ColorScaleColor", "Options": { "MAGENTA": "" } },
+                { "Name": "Yellowscale", "Filter": "ColorScale", "Options": { "YELLOW": "" } },
+                { "Name": "Yellowscale + Color", "Filter": "ColorScaleColor", "Options": { "YELLOW": "" } }
+            ]
+        },
+        {
             "Name": "Distortion",
             "Children": [
                 { "Name": "Mirror Top", "Filter": "Mirror", "Options": { "TOPTOP": "" } },

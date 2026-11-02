@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OptionView: View
 {
-    var SourceName: String = "Built-in image"
+    var SourceName: String = "Built-in"
     var FilterName: String = "None"
     /// How long the last render took. `nil` shows a dash.
     var RenderTime: Duration? = nil
@@ -51,20 +51,27 @@ struct OptionView: View
                     HStack
                     {
                         Text("Source")
+                            .fixedSize()
                         Text(SourceName)
                             .bold()
+                            .lineLimit(1)
+                            .truncationMode(.middle)
                         Spacer()
                     }
                     HStack
                     {
-                        Text("Dimensions")
+                        Text("Size")
+                            .fixedSize()
                         Text(ImageSizeText)
                             .bold()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                         Spacer()
                     }
                     HStack
                     {
-                        Text("Render time")
+                        Text("Render")
+                            .fixedSize()
                         Text(RenderTimeText)
                             .bold()
                         Spacer()
@@ -88,6 +95,7 @@ struct OptionView: View
                 Spacer()
             }
         }
+        .padding(.horizontal)
     }
 }
 

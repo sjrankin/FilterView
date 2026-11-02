@@ -18,11 +18,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var Delegate
 #endif
     
+    /// The pipeline of filters, shared by the main window and the Pipeline window.
+    @State private var Pipeline = PipelineModel()
+
     var body: some Scene
     {
         WindowGroup
         {
             ContentView()
+                .environment(Pipeline)
         }
+#if os(macOS)
+        Window("Pipeline", id: PipelineWindow.ID)
+        {
+            PipelineWindow()
+                .environment(Pipeline)
+        }
+        .defaultSize(width: 900, height: 420)
+#endif
     }
 }

@@ -51,5 +51,6 @@ struct ContentView: View
 #Preview
 {
     ContentView()
+        .environment(PipelineModel())
 }
 

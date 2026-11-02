@@ -36,6 +36,25 @@ final class CameraFrameSource: NSObject, AVCaptureVideoDataOutputSampleBufferDel
     /// AVFoundation delivers frames on a dispatch queue, so this cannot be a Swift concurrency construct.
     private let Queue = DispatchQueue(label: "FilterView.CameraFrames")
     private let LastFrameTime = Mutex<CMTime>(.invalid)
+    /// While true the frames keep the orientation they have, so a recording (whose size is fixed by its first frame) is not
+    /// disturbed by the device turning.
+    var RotationLocked: Bool
+    {
+        get
+        {
+            RotationLock.withLock { $0 }
+        }
+        set
+        {
+            RotationLock.withLock { $0 = newValue }
+        }
+    }
+
+    private let RotationLock = Mutex<Bool>(false)
+    #if os(iOS)
+    /// Says which way is up for the camera as the device turns. Set while the camera runs.
+    nonisolated(unsafe) private var Rotation: AVCaptureDevice.RotationCoordinator? = nil
+    #endif
     private let Sink = Mutex<AsyncStream<CGImage>.Continuation?>(nil)
 
     /// Starts the camera and returns its frames.
@@ -83,8 +102,10 @@ final class CameraFrameSource: NSObject, AVCaptureVideoDataOutputSampleBufferDel
                 self.Session.addInput(NewInput)
                 self.Session.addOutput(NewOutput)
                 #if os(iOS)
-                // Portrait.
-                NewOutput.connection(with: .video)?.videoRotationAngle = 90
+                // Upright for the way the device is held now; `captureOutput` keeps it so as the device turns.
+                let Coordinator = AVCaptureDevice.RotationCoordinator(device: Camera, previewLayer: nil)
+                self.Rotation = Coordinator
+                NewOutput.connection(with: .video)?.videoRotationAngle = Coordinator.videoRotationAngleForHorizonLevelCapture
                 #endif
                 Continuation.resume(returning: true)
             }
@@ -135,6 +156,16 @@ final class CameraFrameSource: NSObject, AVCaptureVideoDataOutputSampleBufferDel
                 return
             }
         }
+        #if os(iOS)
+        if !RotationLocked,
+           let Angle = Rotation?.videoRotationAngleForHorizonLevelCapture,
+           Connection.videoRotationAngle != Angle,
+           Connection.isVideoRotationAngleSupported(Angle)
+        {
+            // This frame still has the old angle; the next ones are turned.
+            Connection.videoRotationAngle = Angle
+        }
+        #endif
         LastFrameTime.withLock { $0 = Now }
         guard let Pixels = CMSampleBufferGetImageBuffer(Buffer) else
         {

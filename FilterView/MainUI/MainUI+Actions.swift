@@ -60,7 +60,7 @@ extension MainUI
     /// `SourceName`.
     var DisplayedSourceName: String
     {
-        InputSource == .Video ? "Live camera video" : SourceName
+        InputSource == .Video ? "Live video" : SourceName
     }
 
     /// Makes an image file dropped on the image area (macOS) the source image.
@@ -97,8 +97,54 @@ extension MainUI
         }
         SourceImage = ImageUtility.CGImageToImage(Photo)
         SourceSize = CGSize(width: Photo.width, height: Photo.height)
-        SourceName = "Camera photo, \(Date.now.formatted(date: .abbreviated, time: .shortened))"
+        SourceName = "Camera photo"
         SourceID = UUID()
+    }
+
+    /// Adds the selected filter to the pipeline (the Set button).
+    func AddToPipeline()
+    {
+        guard let Selection = Selection else
+        {
+            return
+        }
+        Task
+        {
+            await Pipeline.Add(Selection)
+        }
+    }
+
+    /// The Conditional button. It will test the whole image (too dark, too light, too red, and so on) and branch on the result.
+    /// It does nothing yet.
+    func AddConditionalToPipeline()
+    {
+    }
+
+    /// Makes the image shown by the pipeline's original stage the pipeline's first image: its filters are run on it again. Live
+    /// video does this for every frame instead (see `RunLiveVideo`).
+    func SyncPipeline()
+    {
+        guard Pipeline.IsOpen,
+              InputSource != .Video,
+              let Original = ImageUtility.ImageToCGImage(SourceImage) else
+        {
+            return
+        }
+        Task
+        {
+            await Pipeline.Refresh(Original: Original)
+        }
+    }
+
+    /// Makes the pipeline's final image the source image, ending any live video.
+    /// - Parameter Result: The image.
+    func UsePipelineResult(_ Result: CGImage)
+    {
+        SourceImage = ImageUtility.CGImageToImage(Result)
+        SourceName = "Pipeline result"
+        SourceSize = CGSize(width: Result.width, height: Result.height)
+        SourceID = UUID()
+        InputSource = .Image
     }
 
     /// Applies the selected filter (if any) to the image, encodes it as PNG, and shows the save dialog.
@@ -109,10 +155,19 @@ extension MainUI
             return
         }
         if let Selection = Selection,
-           let Server = Filters,
-           let Filtered = try? await Server.Run(Filter: Selection.Filter, With: Result, Selection.Options)
+           let Server = Filters
         {
-            Result = Filtered
+            do
+            {
+                Result = try await Server.Run(Filter: Selection.Filter, With: Result, Selection.Options)
+            }
+            catch
+            {
+                // The unfiltered image is saved instead.
+                #if DEBUG
+                print("Filter \(Selection.Filter) failed while saving: \(error)")
+                #endif
+            }
         }
         guard let Encoded = ImageUtility.ImageEncoder.PNGData(Result) else
         {
@@ -148,10 +203,19 @@ extension MainUI
                 var Result = Frame
                 // The selection is read for every frame, so changing the filter applies at once with no restart.
                 if let Selection = Selection,
-                   let Server = Filters,
-                   let Filtered = try? await Server.Run(Filter: Selection.Filter, With: Frame, Selection.Options)
+                   let Server = Filters
                 {
-                    Result = Filtered
+                    do
+                    {
+                        Result = try await Server.Run(Filter: Selection.Filter, With: Frame, Selection.Options)
+                    }
+                    catch
+                    {
+                        // The unfiltered frame is shown instead. Printed for every frame that fails, as the filter is tried on each.
+                        #if DEBUG
+                        print("Filter \(Selection.Filter) failed on a live frame: \(error)")
+                        #endif
+                    }
                 }
                 LiveImage = ImageUtility.CGImageToImage(Result)
                 LiveSource = ImageUtility.CGImageToImage(Frame)
@@ -160,6 +224,10 @@ extension MainUI
                 if IsRecording
                 {
                     await Recorder.Append(Result)
+                }
+                if Pipeline.IsOpen
+                {
+                    await Pipeline.Refresh(Original: Frame)
                 }
             }
             // The stream ends when the input is changed. Finish any recording rather than lose it.
