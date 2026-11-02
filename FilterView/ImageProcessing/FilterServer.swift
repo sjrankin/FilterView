@@ -59,6 +59,13 @@ class FilterServer
         Register(ColorScale.FilterName, ColorScale())
         Register(ColorScaleColor.FilterName, ColorScaleColor())
         Register(BackgroundClear.FilterName, BackgroundClear())
+        Register(CIGaussianBlur.FilterName, CIGaussianBlur())
+        Register(CIMedian.FilterName, CIMedian())
+        Register(CIMorphologyGradient.FilterName, CIMorphologyGradient())
+        Register(CIMorphologyMaximum.FilterName, CIMorphologyMaximum())
+        Register(CIMorphologyMinimum.FilterName, CIMorphologyMinimum())
+        Register(CIMotionBlur.FilterName, CIMotionBlur())
+        Register(CIZoomBlur.FilterName, CIZoomBlur())
     }
 
     /// Adds a filter, remembering the order in which it was added.

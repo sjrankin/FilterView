@@ -322,6 +322,60 @@
             },
             { "Name": "Comic Effect", "Filter": "CI ComicEffect" }
           ]
+        },
+        {
+            "Name": "Blur",
+            "Children": [
+                {
+                    "Name": "Gaussian Blur",
+                    "Filter": "CI Gaussian Blur",
+                    "Parameters": [
+                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
+                    ]
+                },
+                {
+                    "Name": "Median",
+                    "Filter": "CI Median"
+                },
+                {
+                    "Name": "Morphology Gradient",
+                    "Filter": "CI MorphologyGradient",
+                    "Parameters": [
+                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10"}
+                    ]
+                },
+                {
+                    "Name": "Morphology Maximum",
+                    "Filter": "CI MorphologyMaximum",
+                    "Parameters": [
+                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
+                    ]
+                },
+                {
+                    "Name": "Morphology Minimum",
+                    "Filter": "CI MorphologyMinimum",
+                    "Parameters": [
+                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"}
+                    ]
+                },
+                {
+                    "Name": "Motion Blur",
+                    "Filter": "CI Motion Blur",
+                    "Parameters": [
+                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "20"},
+                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0"}
+                    ]
+                },
+                {
+                    "Name": "Zoom Blur",
+                    "Filter": "CI Zoom Blur",
+                    "Parameters": [
+                        { "Key": "AMOUNT", "Title": "Amount", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "5"},
+                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" }
+                    ]
+                }
+            ]
         }
       ]
     }
