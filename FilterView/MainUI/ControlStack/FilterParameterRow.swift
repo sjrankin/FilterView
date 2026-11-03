@@ -118,16 +118,34 @@ struct FilterParameterRow: View
                 VStack(alignment: .leading)
                 {
                     Text(Parameter.Title)
-                    Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
+                    // Long titles make a segmented control wider than the panel and push the layout out of shape, so those
+                    // choices go in a menu.
+                    if (Parameter.Choices ?? []).reduce(0, { $0 + $1.Title.count }) > 24
                     {
-                        ForEach(Parameter.Choices ?? [], id: \.Value)
+                        Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
                         {
-                            Choice in
-                            Text(Choice.Title).tag(Choice.Value)
+                            ForEach(Parameter.Choices ?? [], id: \.Value)
+                            {
+                                Choice in
+                                Text(Choice.Title).tag(Choice.Value)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
                     }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
+                    else
+                    {
+                        Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
+                        {
+                            ForEach(Parameter.Choices ?? [], id: \.Value)
+                            {
+                                Choice in
+                                Text(Choice.Title).tag(Choice.Value)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                    }
                 }
         }
     }

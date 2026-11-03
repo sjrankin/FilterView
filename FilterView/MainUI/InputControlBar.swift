@@ -25,6 +25,10 @@ struct InputControlBar: View
     var OnTakePhoto: () -> Void
     /// Called when the user taps Save. Must prepare `ExportDocument` and set `ShowExporter`.
     var OnSave: () async -> Void
+    /// True once a live video frame has arrived, so there is one to save.
+    var HasFrame: Bool
+    /// Called when the user taps Save Frame. Must prepare `ExportDocument` and set `ShowExporter`.
+    var OnSaveFrame: () -> Void
     /// True while live video is being recorded.
     var IsRecording: Bool
     /// The finished recording, if any. Save saves it (again, if it was already saved) until the next recording replaces it.
@@ -121,6 +125,12 @@ struct InputControlBar: View
                         .foregroundStyle(.red)
                         .fixedSize()
                     }
+                    Button("Save Frame", systemImage: "camera.viewfinder")
+                    {
+                        OnSaveFrame()
+                    }
+                    .disabled(!HasFrame)
+                    .fixedSize()
                 }
                 Spacer()
                 if InputSource == .Image
@@ -172,7 +182,7 @@ struct InputControlBar: View
                 .fileExporter(isPresented: $ShowExporter,
                               document: ExportDocument,
                               contentType: .png,
-                              defaultFilename: "Filtered")
+                              defaultFilename: InputSource == .Video ? "Frame" : "Filtered")
                 {
                     Result in
                     switch Result
@@ -212,6 +222,8 @@ struct InputControlBar: View
                     OnLoad: { _ in },
                     OnTakePhoto: {},
                     OnSave: {},
+                    HasFrame: false,
+                    OnSaveFrame: {},
                     IsRecording: false,
                     Movie: nil,
                     ShowMovieExporter: $ExportingMovie,

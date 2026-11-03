@@ -130,6 +130,8 @@ struct MainUI: View
                                 OnLoad: ImportLoadedImage,
                                 OnTakePhoto: { ShowCamera = true },
                                 OnSave: PrepareExport,
+                                HasFrame: LiveImage != nil,
+                                OnSaveFrame: SaveLiveFrame,
                                 IsRecording: IsRecording,
                                 Movie: LastMovie,
                                 ShowMovieExporter: $ShowMovieExporter,

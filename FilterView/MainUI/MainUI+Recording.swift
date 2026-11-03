@@ -41,4 +41,18 @@ extension MainUI
             print("Recording failed: \(error)")
         }
     }
+
+    /// Saves the newest live video frame, as filtered by the running filter, as a PNG. `LiveImage` already has the filter
+    /// applied, so the saved frame is what is on screen.
+    func SaveLiveFrame()
+    {
+        guard let Frame = LiveImage,
+              let Result = ImageUtility.ImageToCGImage(Frame),
+              let Encoded = ImageUtility.ImageEncoder.PNGData(Result) else
+        {
+            return
+        }
+        ExportDocument = ImageUtility.PNGImage(Data: Encoded)
+        ShowExporter = true
+    }
 }

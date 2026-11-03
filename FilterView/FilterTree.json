@@ -12,14 +12,22 @@
             "Children": [
                 {
                     "Name": "Invert",
-                    "Children": [
-                        { "Name": "Invert All", "Filter": "Metal Invert" },
-                        { "Name": "Invert Red", "Filter": "Channel Invert", "Options": { "RED": "" } },
-                        { "Name": "Invert Green", "Filter": "Channel Invert", "Options": { "GREEN": "" } },
-                        { "Name": "Invert Blue", "Filter": "Channel Invert", "Options": { "BLUE": "" } },
-                        { "Name": "Invert Red + Green", "Filter": "Channel Invert", "Options": { "REDGREEN": "" } },
-                        { "Name": "Invert Red + Blue", "Filter": "Channel Invert", "Options": { "REDBLUE": "" } },
-                        { "Name": "Invert Green + Blue", "Filter": "Channel Invert", "Options": { "GREENBLUE": "" } }
+                    "Filter": "Metal Invert",
+                    "Parameters": [
+                        {
+                            "Key": "MODE", "Title": "Invert", "Type": "Choice", "Default": "ALL",
+                            "Choices": [
+                                { "Title": "All", "Value": "ALL" },
+                                { "Title": "Red", "Value": "RED" },
+                                { "Title": "Green", "Value": "GREEN" },
+                                { "Title": "Blue", "Value": "BLUE" },
+                                { "Title": "Red + Green", "Value": "REDGREEN" },
+                                { "Title": "Red + Blue", "Value": "REDBLUE" },
+                                { "Title": "Green + Blue", "Value": "GREENBLUE" },
+                                { "Title": "Brightness", "Value": "BRIGHTNESS" }
+                            ]
+                        },
+                        { "Key": "COLOR", "Title": "Show Color (Brightness)", "Type": "Toggle", "Default": "false" }
                     ]
                 },
                 {
@@ -32,18 +40,6 @@
                                 { "Key": "TARGET", "Title": "Target Color", "Type": "Color", "Default": "FFFFFFFF" },
                                 { "Key": "SOURCE", "Title": "Replace With", "Type": "Color", "Default": "00000000" },
                                 { "Key": "TOLERANCE", "Title": "Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "Name": "Brightness",
-                    "Children": [
-                        {
-                            "Name": "Brightness Invert",
-                            "Filter": "Metal Bright Invert",
-                            "Parameters": [
-                                { "Key": "COLOR", "Title": "Show Color", "Type": "Toggle", "Default": "false" }
                             ]
                         }
                     ]
@@ -104,10 +100,20 @@
                 {
                     "Name": "Stylize",
                     "Children": [
-                        { "Name": "Kuwahara Radius 2", "Filter": "Metal Kuwahara", "Options": { "RADIUS2": "" } },
-                        { "Name": "Kuwahara Radius 4", "Filter": "Metal Kuwahara", "Options": { "RADIUS4": "" } },
-                        { "Name": "Kuwahara Radius 6", "Filter": "Metal Kuwahara", "Options": { "RADIUS6": "" } },
-                        { "Name": "Kuwahara Radius 8", "Filter": "Metal Kuwahara", "Options": { "RADIUS8": "" } }
+                        {
+                            "Name": "Kuwahara", "Filter": "Metal Kuwahara",
+                            "Parameters": [
+                                {
+                                    "Key": "RADIUS", "Title": "Radius", "Type": "Segments", "Default": "4",
+                                    "Choices": [
+                                        { "Title": "2", "Value": "2" },
+                                        { "Title": "4", "Value": "4" },
+                                        { "Title": "6", "Value": "6" },
+                                        { "Title": "8", "Value": "8" }
+                                    ]
+                                }
+                            ]
+                        }
                     ]
                 },
                 {
