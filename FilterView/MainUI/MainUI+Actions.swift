@@ -4,11 +4,37 @@
 //
 //  Created by Stuart Rankin on 10/31/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 
 extension MainUI
 {
+    /// Goes back to the built-in test image (Hana). Ends live video, by choosing Image as the input, and makes a pipeline that is open start
+    /// again from the test image.
+    func ResetToBuiltInImage()
+    {
+        SourceImage = Image("Hana")
+        SourceName = "Built-in"
+        SourceSize = nil
+        MeasureBuiltInImage()
+        SourceID = UUID()
+        InputSource = .Image
+    }
+
     /// Loads an image file chosen with the file importer and makes it the source image.
     /// - Parameter NewImage: The file. It is security scoped, so access is requested here.
     func ImportLoadedImage(_ NewImage: URL)

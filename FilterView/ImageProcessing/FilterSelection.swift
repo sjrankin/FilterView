@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 10/29/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 
@@ -23,6 +37,19 @@ struct FilterSelection: Hashable, Sendable
 
     /// The options the user can change for this entry. Their current values are in `Options`.
     let Parameters: [FilterParameter]
+
+    /// True if a parameter applies with the options as they are now. A parameter with no condition always does. One that depends on another
+    /// parameter applies while that parameter has one of the listed values, or, if it has no value yet, its default.
+    /// - Parameter Parameter: One of this selection's parameters.
+    func IsEnabled(_ Parameter: FilterParameter) -> Bool
+    {
+        guard let Condition = Parameter.EnabledWhen else
+        {
+            return true
+        }
+        let Current = Options?[Condition.Key] ?? Parameters.first{$0.Key == Condition.Key}?.Default
+        return Condition.Values.contains(Current ?? "")
+    }
 
     /// True if this selection runs a saved pipeline instead of a single filter.
     var IsPipeline: Bool

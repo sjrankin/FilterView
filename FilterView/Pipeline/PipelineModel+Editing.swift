@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 11/2/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 import CoreGraphics
@@ -113,6 +127,65 @@ extension PipelineModel
         Stages[Where].Skipped = false
         Dirty.insert(ID)
         Kick()
+    }
+
+    /// Puts a new filter stage in the line right after a stage. Whatever continued the line from the stage now continues from the new
+    /// one. Stages that hang under the stage, and merges that take its image as their second image, still take the stage's own image.
+    /// - Parameter ID: The stage to insert after.
+    /// - Parameter Selection: The filter, or saved pipeline, the new stage runs, as chosen in the filter tree. `nil` makes a stage that
+    /// passes the image through, which `UseSelectedFilter` can give a filter later.
+    func InsertFilter(After ID: Int, With Selection: FilterSelection?)
+    {
+        guard StageFor(ID) != nil,
+              Accepts(Selection) else
+        {
+            return
+        }
+        let NewID = TakeID()
+        for Where in Stages.indices where Stages[Where].Input == ID && !Stages[Where].Under
+        {
+            Stages[Where].Input = NewID
+            Dirty.insert(Stages[Where].id)
+        }
+        Stages.append(Stage(id: NewID, Kind: .Filter, Selection: Selection, Input: ID))
+        Dirty.insert(NewID)
+        Kick()
+    }
+
+    /// Puts a new filter stage in the line right before a stage. The new stage takes the image the stage took, and the stage takes the new
+    /// stage's image. If the stage was hanging under the stage it takes its image from, the new stage takes its place there and the stage
+    /// continues the line from it. The original image has nothing before it.
+    /// - Parameter ID: The stage to insert before.
+    /// - Parameter Selection: The filter, or saved pipeline, the new stage runs. `nil` makes a passthrough stage.
+    func InsertFilter(Before ID: Int, With Selection: FilterSelection?)
+    {
+        guard let Target = StageFor(ID),
+              Target.Kind != .Original,
+              let Source = Target.Input,
+              let Where = Stages.firstIndex(where: {$0.id == ID}),
+              Accepts(Selection) else
+        {
+            return
+        }
+        let NewID = TakeID()
+        Stages[Where].Input = NewID
+        Stages[Where].Under = false
+        Dirty.insert(ID)
+        Stages.append(Stage(id: NewID, Kind: .Filter, Selection: Selection, Input: Source, Under: Target.Under))
+        Dirty.insert(NewID)
+        Kick()
+    }
+
+    /// True if a filter can be put in this pipeline. If it cannot, the user is told why.
+    private func Accepts(_ Selection: FilterSelection?) -> Bool
+    {
+        guard let Selection = Selection,
+              let Refused = NestingProblem(for: Selection) else
+        {
+            return true
+        }
+        Problem = Refused
+        return false
     }
 
     /// The stages a stage can be merged with. A merge may never make a loop, and may only go to a stage numbered higher than the

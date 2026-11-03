@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 11/3/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Testing
 import Foundation
@@ -70,6 +84,23 @@ struct PipelineModelSavingTests
         let Model = await MakeModel(Amounts: ["4"])
         try Model.Save(Name: "Away", Directory: Other, Library: Made.Library)
         #expect(Model.SaveProblem(Name: "Away", Directory: Other, Library: Made.Library) == nil)
+    }
+
+    @Test func SavingAgainStartsInTheFolderThePipelineIsIn() async throws
+    {
+        let Made = try TestSupport.MakeLibrary()
+        let Other = try TestSupport.MakeFolder()
+        let Model = await MakeModel(Amounts: ["4"])
+        // Not saved yet, or in the default folder: the default folder.
+        #expect(Model.SaveFolder(Library: Made.Library) == nil)
+        try Model.Save(Name: "Here", Directory: nil, Library: Made.Library)
+        #expect(Model.SaveFolder(Library: Made.Library) == nil)
+        // In another folder: that folder, and saving there again over the same file is allowed.
+        let Away = await MakeModel(Amounts: ["4"])
+        try Away.Save(Name: "There", Directory: Other, Library: Made.Library)
+        let Folder = try #require(Away.SaveFolder(Library: Made.Library))
+        #expect(Folder.resolvingSymlinksInPath().path == Other.resolvingSymlinksInPath().path)
+        #expect(Away.SaveProblem(Name: "There", Directory: Folder, Library: Made.Library) == nil)
     }
 
     @Test func ASavedPipelineBecomesAStageOfAnother() async throws

@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 11/3/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 import CoreGraphics
@@ -87,6 +101,19 @@ extension PipelineModel
         CurrentURL = URL
         Dirty = Set(Stages.dropFirst().map{$0.id})
         await Drain()
+    }
+
+    /// The folder a save should start in. If the pipeline came from, or was last saved in, a folder other than the default one, that folder,
+    /// so that saving it again writes over the same file. `nil` means the default folder.
+    /// - Parameter Library: The pipelines the app knows about.
+    func SaveFolder(Library: PipelineLibrary) -> URL?
+    {
+        guard let Current = CurrentURL else
+        {
+            return nil
+        }
+        let Folder = Current.deletingLastPathComponent()
+        return Folder.resolvingSymlinksInPath().path == Library.DefaultDirectory.resolvingSymlinksInPath().path ? nil : Folder
     }
 
     /// Records that the pipeline was saved, so it can be saved over later.

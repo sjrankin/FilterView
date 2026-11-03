@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 11/2/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import CoreGraphics
@@ -30,6 +44,11 @@ struct BackgroundClear: ImageFilter
     ///   - "SOURCE": The color that replaces it. Default is fully transparent (`00000000`), which clears the background.
     ///   - "TOLERANCE": A normal value, 0.0 to 1.0. 0.0 matches only the exact target color and 1.0 matches every color.
     ///   Default is 0.1.
+    ///   - "IGNOREALPHA": `true` compares only the red, green, and blue of each pixel and of the target, so a pixel that is partly
+    ///   transparent is matched by its color alone. A fully transparent pixel has no color and is never matched. Default is `false`, when
+    ///   alpha counts as a fourth part of the color.
+    ///   - "KEEPALPHA": `true` replaces only the color of a matched pixel and leaves its alpha as it was, so the alpha of "SOURCE" is not
+    ///   used. Default is `false`, when the replacement is written as it is, alpha included.
     func ProcessImage(_ Input: CGImage, _ Options: [String: Any]?) async throws -> CGImage
     {
         let Target = FilterOptionValues.ParseColor(Options?["TARGET"] as? String) ?? [1, 1, 1, 1]
@@ -42,7 +61,9 @@ struct BackgroundClear: ImageFilter
         }
         return try await MetalProcessor.Shared.Run(Kernel: "BackgroundClear",
                                                    On: Input,
-                                                   Parameters: Target + Replacement + [Tolerance])
+                                                   Parameters: Target + Replacement + [Tolerance,
+                                                                                         FilterOptionValues.Flag(Options, "IGNOREALPHA") ? 1 : 0,
+                                                                                         FilterOptionValues.Flag(Options, "KEEPALPHA") ? 1 : 0])
     }
     
     /// Tolerance when none is given.

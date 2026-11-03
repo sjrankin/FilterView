@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 10/27/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 
@@ -53,6 +67,8 @@ struct MainUI: View
     @State var LastMovie: RecordedMovie? = nil
     /// Shows the dialog that asks where to save `LastMovie`.
     @State var ShowMovieExporter = false
+    /// Shows the general settings dialog.
+    @State var ShowSettings = false
 
     /// True on a narrow screen (iPhone in portrait): the panel goes under the image instead of beside it.
     private var IsCompact: Bool
@@ -128,6 +144,8 @@ struct MainUI: View
                                 ShowExporter: $ShowExporter,
                                 ExportDocument: ExportDocument,
                                 OnLoad: ImportLoadedImage,
+                                CanReset: SourceName != "Built-in" || InputSource != .Image,
+                                OnReset: ResetToBuiltInImage,
                                 OnTakePhoto: { ShowCamera = true },
                                 OnSave: PrepareExport,
                                 HasFrame: LiveImage != nil,
@@ -151,6 +169,24 @@ struct MainUI: View
                          FilterName: Selection?.DisplayName ?? "None", RenderTime: RenderTime,
                          ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage)
                 .frame(width: IsCompact ? nil : PanelWidth, height: IsCompact ? PanelHeight : nil)
+        }
+        // The settings button is in the upper right corner of the window.
+        .overlay(alignment: .topTrailing)
+        {
+            Button("Settings", systemImage: "gearshape")
+            {
+                ShowSettings = true
+            }
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .controlSize(.large)
+            .keyboardShortcut(",", modifiers: .command)
+            .help("Settings")
+            .padding(8)
+        }
+        .sheet(isPresented: $ShowSettings)
+        {
+            SettingsView()
         }
         .onAppear
         {

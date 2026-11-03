@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 10/31/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import AVFoundation
@@ -15,6 +29,10 @@ import CoreGraphics
 /// Call `Begin()`, then `Append(_:)` for each frame, then `Finish()`, which returns the file. The video's size is the size of
 /// the first frame; later frames of another size are scaled to fit. Each frame is stamped with the time it arrives, so the video
 /// plays at the speed it was recorded even though the frame rate varies.
+///
+/// A video cannot hold transparency, so every frame is put on the background chosen in the settings (black, white, or the checkerboard the
+/// main window shows), which is how a frame with transparent parts looks on screen. Without that, the parts of a frame that are transparent
+/// or partly so would be black.
 actor VideoRecorder
 {
     private var Writer: AVAssetWriter? = nil
@@ -25,13 +43,19 @@ actor VideoRecorder
     private var LastTime = CMTime.invalid
     private var VideoWidth = 0
     private var VideoHeight = 0
+    /// What every frame is drawn over, the size of the video.
+    private var Backdrop: CGImage? = nil
+    /// The background chosen when the recording began.
+    private var Background = ImageBackgrounds.Checkerboard
     private var IsActive = false
 
     /// Starts a new recording. The file is created when the first frame arrives, because its size is not known until then.
     /// A recording that was never finished is thrown away.
-    func Begin()
+    /// - Parameter Background: What every frame is put on, which is what shows through its transparent parts.
+    func Begin(Background: ImageBackgrounds = .Checkerboard)
     {
         Discard()
+        self.Background = Background
         IsActive = true
     }
 
@@ -88,7 +112,12 @@ actor VideoRecorder
             {
                 return false
             }
-            Context.draw(Frame, in: CGRect(x: 0, y: 0, width: Width, height: Height))
+            let Area = CGRect(x: 0, y: 0, width: Width, height: Height)
+            if let Backdrop = Backdrop
+            {
+                Context.draw(Backdrop, in: Area)
+            }
+            Context.draw(Frame, in: Area)
             return true
         }
         guard Drawn else
@@ -170,9 +199,63 @@ actor VideoRecorder
         FileURL = File
         VideoWidth = Width
         VideoHeight = Height
+        Backdrop = VideoRecorder.Backdrop(for: Background, Width: Width, Height: Height)
         StartedAt = ContinuousClock.now
         LastTime = .invalid
         return true
+    }
+
+    /// What frames are drawn over for a background.
+    /// - Parameter Kind: The background.
+    /// - Parameter Width: Width of the video in pixels.
+    /// - Parameter Height: Height of the video in pixels.
+    /// - Returns: An opaque image the size of the video, or `nil` if it cannot be made.
+    nonisolated static func Backdrop(for Kind: ImageBackgrounds, Width: Int, Height: Int) -> CGImage?
+    {
+        switch Kind
+        {
+            case .Checkerboard:
+                return Checkerboard(Width: Width, Height: Height)
+
+            case .Black, .White:
+                guard let Context = CGContext(data: nil, width: Width, height: Height, bitsPerComponent: 8, bytesPerRow: 0,
+                                              space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                                              bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else
+                {
+                    return nil
+                }
+                Context.setFillColor(CGColor(srgbRed: Kind == .White ? 1 : 0, green: Kind == .White ? 1 : 0, blue: Kind == .White ? 1 : 0,
+                                             alpha: 1))
+                Context.fill(CGRect(x: 0, y: 0, width: Width, height: Height))
+                return Context.makeImage()
+        }
+    }
+
+    /// The checkerboard frames are drawn over: squares of light and darker gray, the same grays as the one in the main window. The squares
+    /// grow with the video so they look the same at any size.
+    /// - Parameter Width: Width of the video in pixels.
+    /// - Parameter Height: Height of the video in pixels.
+    /// - Returns: An opaque image the size of the video, or `nil` if it cannot be made.
+    nonisolated static func Checkerboard(Width: Int, Height: Int) -> CGImage?
+    {
+        guard let Context = CGContext(data: nil, width: Width, height: Height, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else
+        {
+            return nil
+        }
+        let Square = max(min(Width, Height) / 48, 8)
+        Context.setFillColor(CGColor(srgbRed: 0.85, green: 0.85, blue: 0.85, alpha: 1))
+        Context.fill(CGRect(x: 0, y: 0, width: Width, height: Height))
+        Context.setFillColor(CGColor(srgbRed: 0.6, green: 0.6, blue: 0.6, alpha: 1))
+        for Row in 0 ..< (Height + Square - 1) / Square
+        {
+            for Column in 0 ..< (Width + Square - 1) / Square where (Row + Column).isMultiple(of: 2)
+            {
+                Context.fill(CGRect(x: Column * Square, y: Row * Square, width: Square, height: Square))
+            }
+        }
+        return Context.makeImage()
     }
 
     /// Forgets the writer, leaving the file alone.
@@ -184,6 +267,7 @@ actor VideoRecorder
         FileURL = nil
         StartedAt = nil
         LastTime = .invalid
+        Backdrop = nil
     }
 
     /// Cancels any unfinished recording and deletes its file.

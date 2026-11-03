@@ -27,19 +27,50 @@
                                 { "Title": "Brightness", "Value": "BRIGHTNESS" }
                             ]
                         },
-                        { "Key": "COLOR", "Title": "Show Color (Brightness)", "Type": "Toggle", "Default": "false" }
+                        { "Key": "COLOR", "Title": "Show Color (Brightness)", "Type": "Toggle", "Default": "false", "EnabledWhen": { "Key": "MODE", "Values": ["BRIGHTNESS"] } }
                     ]
                 },
                 {
                     "Name": "Background",
                     "Children": [
                         {
-                            "Name": "Clear Background",
+                            "Name": "Color Swap",
                             "Filter": "BackgroundClear",
                             "Parameters": [
                                 { "Key": "TARGET", "Title": "Target Color", "Type": "Color", "Default": "FFFFFFFF" },
                                 { "Key": "SOURCE", "Title": "Replace With", "Type": "Color", "Default": "00000000" },
-                                { "Key": "TOLERANCE", "Title": "Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" }
+                                { "Key": "TOLERANCE", "Title": "Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1" },
+                                { "Key": "IGNOREALPHA", "Title": "Ignore Alpha", "Type": "Toggle", "Default": "false" },
+                                { "Key": "KEEPALPHA", "Title": "Keep Alpha", "Type": "Toggle", "Default": "false" }
+                            ]
+                        },
+                        {
+                            "Name": "Alpha Shape",
+                            "Filter": "AlphaShape",
+                            "Parameters": [
+                                { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                {
+                                    "Key": "SHAPE", "Title": "Shape", "Type": "Choice", "Default": "CIRCLE",
+                                    "Choices": [
+                                        { "Title": "Circle", "Value": "CIRCLE" },
+                                        { "Title": "Oval", "Value": "OVAL" },
+                                        { "Title": "Square", "Value": "SQUARE" },
+                                        { "Title": "Rectangle", "Value": "RECTANGLE" }
+                                    ]
+                                },
+                                { "Key": "SIZE", "Title": "Hole Size %", "Type": "Slider", "Min": 1, "Max": 400, "Step": 1, "Default": "50" },
+                                { "Key": "ASPECT", "Title": "Short Axis %", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "50" },
+                                { "Key": "ANGLE", "Title": "Axis Angle", "Type": "Slider", "Min": 0, "Max": 180, "Step": 1, "Default": "0" },
+                                {
+                                    "Key": "MODE", "Title": "Alpha", "Type": "Choice", "Default": "SET",
+                                    "Choices": [
+                                        { "Title": "Set to value", "Value": "SET" },
+                                        { "Title": "Fade 1 to 0, outside in", "Value": "FADEOUT" }
+                                    ]
+                                },
+                                { "Key": "ALPHA", "Title": "Alpha Value", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                                { "Key": "INVERT", "Title": "Invert", "Type": "Toggle", "Default": "false" }
                             ]
                         }
                     ]
@@ -75,6 +106,35 @@
                             ]
                         },
                         { "Key": "COLOR", "Title": "Show in Color", "Type": "Toggle", "Default": "false" }
+                    ]
+                },
+                {
+                    "Name": "Color Region",
+                    "Filter": "ColorRegion",
+                    "Parameters": [
+                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                        {
+                            "Key": "SHAPE", "Title": "Shape", "Type": "Choice", "Default": "CIRCLE",
+                            "Choices": [
+                                { "Title": "Circle", "Value": "CIRCLE" },
+                                { "Title": "Oval", "Value": "OVAL" },
+                                { "Title": "Square", "Value": "SQUARE" },
+                                { "Title": "Rectangle", "Value": "RECTANGLE" }
+                            ]
+                        },
+                        { "Key": "SIZE", "Title": "Region Size %", "Type": "Slider", "Min": 1, "Max": 400, "Step": 1, "Default": "50" },
+                        { "Key": "ASPECT", "Title": "Short Axis %", "Type": "Slider", "Min": 1, "Max": 100, "Step": 1, "Default": "50" },
+                        { "Key": "ANGLE", "Title": "Axis Angle", "Type": "Slider", "Min": 0, "Max": 180, "Step": 1, "Default": "0" },
+                        {
+                            "Key": "MODE", "Title": "Color", "Type": "Choice", "Default": "SET",
+                            "Choices": [
+                                { "Title": "Set to level", "Value": "SET" },
+                                { "Title": "Fade color to gray, outside in", "Value": "FADEOUT" }
+                            ]
+                        },
+                        { "Key": "LEVEL", "Title": "Color Level", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
+                        { "Key": "INVERT", "Title": "Invert", "Type": "Toggle", "Default": "false" }
                     ]
                 },
                 {
@@ -120,7 +180,17 @@
                     "Name": "Edges",
                     "Children": [
                         { "Name": "Sobel", "Filter": "MPS Sobel" },
-                        { "Name": "Laplacian", "Filter": "MPS Laplacian" }
+                        { "Name": "Laplacian", "Filter": "MPS Laplacian" },
+                        {
+                            "Name": "Canny",
+                            "Filter": "MPS Canny",
+                            "Parameters": [
+                                { "Key": "SIGMA", "Title": "Blur Sigma", "Type": "Slider", "Min": 0.1, "Max": 10, "Step": 0.1, "Default": "1.4" },
+                                { "Key": "HIGH", "Title": "High Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.4" },
+                                { "Key": "LOW", "Title": "Low Threshold", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.2" },
+                                { "Key": "FAST", "Title": "Fast Mode", "Type": "Toggle", "Default": "true" }
+                            ]
+                        }
                     ]
                 },
                 {
@@ -162,6 +232,136 @@
                             "Filter": "Atkinson Dither",
                             "Parameters": [
                                 { "Key": "OPTIMIZED", "Title": "Optimized", "Type": "Toggle", "Default": "true" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name": "OpenCV",
+            "Platform": "macOS",
+            "Children": [
+                {
+                    "Name": "Edges",
+                    "Children": [
+                        {
+                            "Name": "Canny",
+                            "Filter": "OpenCV Canny",
+                            "Parameters": [
+                                { "Key": "LOW", "Title": "Low Threshold", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "100" },
+                                { "Key": "HIGH", "Title": "High Threshold", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "200" },
+                                {
+                                    "Key": "APERTURE", "Title": "Aperture", "Type": "Choice", "Default": "3",
+                                    "Choices": [
+                                        { "Title": "3", "Value": "3" },
+                                        { "Title": "5", "Value": "5" },
+                                        { "Title": "7", "Value": "7" }
+                                    ]
+                                },
+                                { "Key": "L2", "Title": "Exact Gradient (L2)", "Type": "Toggle", "Default": "false" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Smoothing",
+                    "Children": [
+                        {
+                            "Name": "Bilateral",
+                            "Filter": "OpenCV Bilateral",
+                            "Parameters": [
+                                { "Key": "DIAMETER", "Title": "Diameter", "Type": "Slider", "Min": 1, "Max": 25, "Step": 1, "Default": "9" },
+                                { "Key": "SIGMACOLOR", "Title": "Color Sigma", "Type": "Slider", "Min": 1, "Max": 250, "Step": 1, "Default": "75" },
+                                { "Key": "SIGMASPACE", "Title": "Space Sigma", "Type": "Slider", "Min": 1, "Max": 250, "Step": 1, "Default": "75" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Contrast",
+                    "Children": [
+                        {
+                            "Name": "CLAHE",
+                            "Filter": "OpenCV CLAHE",
+                            "Parameters": [
+                                { "Key": "CLIP", "Title": "Clip Limit", "Type": "Slider", "Min": 1, "Max": 40, "Step": 0.5, "Default": "2" },
+                                { "Key": "TILES", "Title": "Tiles", "Type": "Slider", "Min": 2, "Max": 16, "Step": 1, "Default": "8" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Threshold",
+                    "Children": [
+                        {
+                            "Name": "Adaptive Threshold",
+                            "Filter": "OpenCV Adaptive Threshold",
+                            "Parameters": [
+                                { "Key": "BLOCK", "Title": "Block Size", "Type": "Slider", "Min": 3, "Max": 101, "Step": 2, "Default": "11" },
+                                { "Key": "C", "Title": "Offset (C)", "Type": "Slider", "Min": -50, "Max": 50, "Step": 1, "Default": "2" },
+                                {
+                                    "Key": "METHOD", "Title": "Average", "Type": "Choice", "Default": "MEAN",
+                                    "Choices": [
+                                        { "Title": "Mean", "Value": "MEAN" },
+                                        { "Title": "Gaussian", "Value": "GAUSSIAN" }
+                                    ]
+                                },
+                                { "Key": "INVERT", "Title": "Invert", "Type": "Toggle", "Default": "false" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Demosaic",
+                    "Children": [
+                        {
+                            "Name": "Bayer Demosaic",
+                            "Filter": "OpenCV Bayer Demosaic",
+                            "Parameters": [
+                                {
+                                    "Key": "PATTERN", "Title": "Pattern", "Type": "Choice", "Default": "BGGR",
+                                    "Choices": [
+                                        { "Title": "BGGR", "Value": "BGGR" },
+                                        { "Title": "RGGB", "Value": "RGGB" },
+                                        { "Title": "GRBG", "Value": "GRBG" },
+                                        { "Title": "GBRG", "Value": "GBRG" }
+                                    ]
+                                },
+                                { "Key": "VNG", "Title": "VNG (higher quality)", "Type": "Toggle", "Default": "false" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Name": "Morphology",
+                    "Children": [
+                        {
+                            "Name": "Morphology",
+                            "Filter": "OpenCV Morphology",
+                            "Parameters": [
+                                {
+                                    "Key": "OPERATION", "Title": "Operation", "Type": "Choice", "Default": "DILATE",
+                                    "Choices": [
+                                        { "Title": "Erode", "Value": "ERODE" },
+                                        { "Title": "Dilate", "Value": "DILATE" },
+                                        { "Title": "Open", "Value": "OPEN" },
+                                        { "Title": "Close", "Value": "CLOSE" },
+                                        { "Title": "Gradient", "Value": "GRADIENT" },
+                                        { "Title": "Top Hat", "Value": "TOPHAT" },
+                                        { "Title": "Black Hat", "Value": "BLACKHAT" }
+                                    ]
+                                },
+                                {
+                                    "Key": "SHAPE", "Title": "Shape", "Type": "Choice", "Default": "RECT",
+                                    "Choices": [
+                                        { "Title": "Rectangle", "Value": "RECT" },
+                                        { "Title": "Ellipse", "Value": "ELLIPSE" },
+                                        { "Title": "Cross", "Value": "CROSS" }
+                                    ]
+                                },
+                                { "Key": "SIZE", "Title": "Size", "Type": "Slider", "Min": 1, "Max": 51, "Step": 2, "Default": "3" },
+                                { "Key": "ITERATIONS", "Title": "Iterations", "Type": "Slider", "Min": 1, "Max": 10, "Step": 1, "Default": "1" }
                             ]
                         }
                     ]
@@ -680,7 +880,197 @@
                                     { "Key": "TIME", "Title": "Time", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0" },
                                     { "Key": "OVERIMAGE", "Title": "Over Image", "Type": "Toggle", "Default": "false" }
                                 ]
+                            },
+                            {
+                                "Name": "Text Image",
+                                "Filter": "CI Text Image Generator",
+                                "Parameters": [
+                                    { "Key": "TEXT", "Title": "Text", "Type": "Text", "Default": "FilterView" },
+                                    { "Key": "FONT", "Title": "Font", "Type": "Choice", "Default": "HelveticaNeue", "Choices": [{ "Title": "Helvetica Neue", "Value": "HelveticaNeue" }, { "Title": "Helvetica Neue Bold", "Value": "HelveticaNeue-Bold" }, { "Title": "Helvetica", "Value": "Helvetica" }, { "Title": "Arial Bold", "Value": "Arial-BoldMT" }, { "Title": "Avenir Next", "Value": "AvenirNext-Regular" }, { "Title": "Avenir Next Heavy", "Value": "AvenirNext-Heavy" }, { "Title": "Futura", "Value": "Futura-Medium" }, { "Title": "Optima", "Value": "Optima-Regular" }, { "Title": "Georgia", "Value": "Georgia" }, { "Title": "Times New Roman", "Value": "TimesNewRomanPSMT" }, { "Title": "Courier", "Value": "Courier" }, { "Title": "Menlo", "Value": "Menlo-Regular" }, { "Title": "Marker Felt", "Value": "MarkerFelt-Wide" }] },
+                                    { "Key": "FONTSIZE", "Title": "Font Size", "Type": "Slider", "Min": 1, "Max": 1000, "Step": 1, "Default": "48" },
+                                    { "Key": "PADDING", "Title": "Padding", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "0" },
+                                    { "Key": "COLOR", "Title": "Color", "Type": "Color", "Default": "FFFFFFFF" },
+                                    { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                    { "Key": "OVERIMAGE", "Title": "Over Image", "Type": "Toggle", "Default": "false" }
+                                ]
                             }
+                            ]
+                        },
+                        {
+                            "Name": "Distort",
+                            "Children": [
+                                {
+                                    "Name": "Bump Distortion",
+                                    "Filter": "CI Bump Distortion",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 2000, "Step": 1, "Default": "300" },
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": -1, "Max": 1, "Step": 0.01, "Default": "0.5" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Circular Wrap",
+                                    "Filter": "CI Circular Wrap",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 2000, "Step": 1, "Default": "150" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Droste",
+                                    "Filter": "CI Droste",
+                                    "Parameters": [
+                                        { "Key": "POINT0X", "Title": "Corner 1 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "25" },
+                                        { "Key": "POINT0Y", "Title": "Corner 1 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "75" },
+                                        { "Key": "POINT1X", "Title": "Corner 2 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "75" },
+                                        { "Key": "POINT1Y", "Title": "Corner 2 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "25" },
+                                        { "Key": "STRANDS", "Title": "Strands", "Type": "Slider", "Min": -10, "Max": 10, "Step": 0.1, "Default": "1" },
+                                        { "Key": "PERIODICITY", "Title": "Periodicity", "Type": "Slider", "Min": 1, "Max": 10, "Step": 0.1, "Default": "1" },
+                                        { "Key": "ROTATION", "Title": "Rotation", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "ZOOM", "Title": "Zoom", "Type": "Slider", "Min": 0.1, "Max": 5, "Step": 0.01, "Default": "1" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Glass Distortion",
+                                    "Filter": "CI Glass Distortion",
+                                    "Parameters": [
+                                        { "Key": "TEXTURE", "Title": "Texture", "Type": "Segments", "Default": "SOURCE", "Choices": [{ "Title": "Image", "Value": "SOURCE" }, { "Title": "Noise", "Value": "NOISE" }] },
+                                        { "Key": "SMOOTHING", "Title": "Noise Smoothing", "Type": "Slider", "Min": 0, "Max": 20, "Step": 0.5, "Default": "3" },
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": 0, "Max": 1000, "Step": 1, "Default": "200" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Glass Lozenge",
+                                    "Filter": "CI Glass Lozenge",
+                                    "Parameters": [
+                                        { "Key": "POINT0X", "Title": "End 1 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "30" },
+                                        { "Key": "POINT0Y", "Title": "End 1 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "POINT1X", "Title": "End 2 X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "70" },
+                                        { "Key": "POINT1Y", "Title": "End 2 Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 1000, "Step": 1, "Default": "100" },
+                                        { "Key": "REFRACTION", "Title": "Refraction", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.05, "Default": "1.7" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Light Tunnel",
+                                    "Filter": "CI Light Tunnel",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "ROTATION", "Title": "Rotation", "Type": "Slider", "Min": 0, "Max": 360, "Step": 1, "Default": "0" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 1000, "Step": 1, "Default": "100" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Pinch Distortion",
+                                    "Filter": "CI Pinch Distortion",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 2000, "Step": 1, "Default": "300" },
+                                        { "Key": "SCALE", "Title": "Scale", "Type": "Slider", "Min": 0, "Max": 2, "Step": 0.01, "Default": "0.5" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Stretch Crop",
+                                    "Filter": "CI Stretch Crop",
+                                    "Parameters": [
+                                        { "Key": "WIDTH", "Title": "Width %", "Type": "Slider", "Min": 10, "Max": 400, "Step": 1, "Default": "100" },
+                                        { "Key": "HEIGHT", "Title": "Height %", "Type": "Slider", "Min": 10, "Max": 400, "Step": 1, "Default": "100" },
+                                        { "Key": "CROPAMOUNT", "Title": "Crop Amount", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.25" },
+                                        { "Key": "CENTERSTRETCH", "Title": "Center Stretch", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.25" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Torus Lens Distortion",
+                                    "Filter": "CI Torus Lens Distortion",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 1000, "Step": 1, "Default": "160" },
+                                        { "Key": "WIDTH", "Title": "Ring Width", "Type": "Slider", "Min": 0, "Max": 500, "Step": 1, "Default": "80" },
+                                        { "Key": "REFRACTION", "Title": "Refraction", "Type": "Slider", "Min": 0, "Max": 5, "Step": 0.05, "Default": "1.7" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Twirl Distortion",
+                                    "Filter": "CI Twirl Distortion",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 2000, "Step": 1, "Default": "300" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": -720, "Max": 720, "Step": 1, "Default": "180" }
+                                    ]
+                                },
+                                {
+                                    "Name": "Vortex Distortion",
+                                    "Filter": "CI Vortex Distortion",
+                                    "Parameters": [
+                                        { "Key": "CENTERX", "Title": "Center X %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "CENTERY", "Title": "Center Y %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "50" },
+                                        { "Key": "RADIUS", "Title": "Radius", "Type": "Slider", "Min": 0, "Max": 2000, "Step": 1, "Default": "300" },
+                                        { "Key": "ANGLE", "Title": "Angle", "Type": "Slider", "Min": -5400, "Max": 5400, "Step": 10, "Default": "3240" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Name": "Detection",
+                            "Children": [
+                                {
+                                    "Name": "Person Segmentation",
+                                    "Filter": "CI Person Segmentation",
+                                    "Parameters": [
+                                        {
+                                            "Key": "OUTPUT", "Title": "Show", "Type": "Choice", "Default": "PERSON",
+                                            "Choices": [
+                                                { "Title": "Person (background clear)", "Value": "PERSON" },
+                                                { "Title": "Background (person clear)", "Value": "BACKGROUND" },
+                                                { "Title": "Mask", "Value": "MASK" }
+                                            ]
+                                        },
+                                        {
+                                            "Key": "QUALITY", "Title": "Quality", "Type": "Segments", "Default": "BALANCED",
+                                            "Choices": [
+                                                { "Title": "Accurate", "Value": "ACCURATE" },
+                                                { "Title": "Balanced", "Value": "BALANCED" },
+                                                { "Title": "Fast", "Value": "FAST" }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Name": "Face Detector",
+                                    "Filter": "CI Face Detector",
+                                    "Parameters": [
+                                        {
+                                            "Key": "MODE", "Title": "Mark Faces", "Type": "Choice", "Default": "OUTLINE",
+                                            "Choices": [
+                                                { "Title": "Outline", "Value": "OUTLINE" },
+                                                { "Title": "Tint", "Value": "FILL" },
+                                                { "Title": "Blur", "Value": "BLUR" },
+                                                { "Title": "Pixelate", "Value": "PIXELATE" }
+                                            ]
+                                        },
+                                        { "Key": "PADDING", "Title": "Padding %", "Type": "Slider", "Min": 0, "Max": 100, "Step": 1, "Default": "10" },
+                                        { "Key": "COLOR", "Title": "Color", "Type": "Color", "Default": "00FF00FF" },
+                                        { "Key": "LINEWIDTH", "Title": "Line Width", "Type": "Slider", "Min": 1, "Max": 30, "Step": 1, "Default": "4" },
+                                        { "Key": "LANDMARKS", "Title": "Eyes and Mouth", "Type": "Toggle", "Default": "false" },
+                                        {
+                                            "Key": "ACCURACY", "Title": "Accuracy", "Type": "Segments", "Default": "HIGH",
+                                            "Choices": [
+                                                { "Title": "High", "Value": "HIGH" },
+                                                { "Title": "Low", "Value": "LOW" }
+                                            ]
+                                        }
+                                    ]
+                                }
                             ]
                         },
                         {

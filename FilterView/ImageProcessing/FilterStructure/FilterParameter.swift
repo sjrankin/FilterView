@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 11/2/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 
@@ -36,6 +50,10 @@ struct FilterParameter: Codable, Hashable, Identifiable, Sendable
     /// The values a choice can take. Used by `Choice` (a menu) and `Segments` (a segmented picker).
     let Choices: [FilterChoice]?
 
+    /// If set, the parameter only applies while another parameter of the same filter has one of the given values, and its control is grayed out
+    /// the rest of the time. `nil` means it always applies.
+    var EnabledWhen: FilterParameterCondition? = nil
+
     var id: String
     {
         Key
@@ -62,6 +80,7 @@ struct FilterParameter: Codable, Hashable, Identifiable, Sendable
         case Max
         case Step
         case Choices
+        case EnabledWhen
     }
 }
 
@@ -73,4 +92,15 @@ struct FilterChoice: Codable, Hashable, Sendable
 
     /// Value handed to the filter.
     let Value: String
+}
+
+/// When a parameter applies: while the parameter `Key` has one of `Values`. In `FilterTree.json` it is the parameter's `EnabledWhen`, as
+/// `{ "Key": "MODE", "Values": ["BRIGHTNESS"] }`.
+struct FilterParameterCondition: Codable, Hashable, Sendable
+{
+    /// The key of the parameter that decides.
+    let Key: String
+
+    /// The values of that parameter for which this one applies.
+    let Values: [String]
 }

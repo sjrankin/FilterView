@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 10/30/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import Metal
@@ -23,6 +37,8 @@ extension MetalProcessor
     /// - Parameter KeepSourceFormat: If true, the destination texture has the same pixel format as the source (usually BGRA)
     /// instead of RGBA. Needed when the encoder blits the source into the destination, since a blit copies bytes and
     /// would swap red and blue.
+    /// - Parameter Monochrome: If true, the destination texture has one channel, so a kernel that can make a monochrome result (such as
+    /// Canny) converts the source to gray first. The result is made opaque gray, as an RGBA image.
     /// - Parameter Encode: Encodes the kernels. Receives the device, the command buffer, the source texture, and the
     /// destination texture. Throw `FilterException` from here if setup fails.
     /// - Returns: The processed image. The same size as `Input` when `ResultLevel` is 0.
@@ -31,6 +47,7 @@ extension MetalProcessor
                 ResultLevel: Int = 0,
                 Opaque: Bool = false,
                 KeepSourceFormat: Bool = false,
+                Monochrome: Bool = false,
                 Encode: (MTLDevice, MTLCommandBuffer, MTLTexture, MTLTexture) throws -> Void) async throws -> CGImage
     {
         guard let Device = Device,
@@ -41,7 +58,8 @@ extension MetalProcessor
         }
 
         let Source = try MakeSourceTexture(From: Input)
-        let Descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: KeepSourceFormat ? Source.pixelFormat : .rgba8Unorm,
+        let Format: MTLPixelFormat = Monochrome ? .r8Unorm : (KeepSourceFormat ? Source.pixelFormat : .rgba8Unorm)
+        let Descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: Format,
                                                                   width: Source.width,
                                                                   height: Source.height,
                                                                   mipmapped: ResultLevel > 0)
@@ -69,6 +87,45 @@ extension MetalProcessor
             Buffer.commit()
         }
 
+        if Monochrome
+        {
+            return try MakeGrayImage(From: Destination)
+        }
         return try MakeImage(From: Destination, Level: ResultLevel, Opaque: Opaque)
+    }
+
+    /// Copies a one-channel `r8Unorm` texture into an opaque gray `CGImage` (stored as RGBA, so the rest of the app treats it like any image).
+    /// - Parameter Texture: The texture to read.
+    /// - Returns: The converted image.
+    /// - Throws: `FilterException` if the image cannot be created.
+    private func MakeGrayImage(From Texture: MTLTexture) throws -> CGImage
+    {
+        let Width = Texture.width
+        let Height = Texture.height
+        var Gray = [UInt8](repeating: 0, count: Width * Height)
+        Texture.getBytes(&Gray, bytesPerRow: Width, from: MTLRegionMake2D(0, 0, Width, Height), mipmapLevel: 0)
+        var Pixels = [UInt8](repeating: 255, count: Width * Height * 4)
+        for Index in 0 ..< Gray.count
+        {
+            Pixels[Index * 4] = Gray[Index]
+            Pixels[Index * 4 + 1] = Gray[Index]
+            Pixels[Index * 4 + 2] = Gray[Index]
+        }
+        guard let Provider = CGDataProvider(data: Data(Pixels) as CFData),
+              let Result = CGImage(width: Width,
+                                   height: Height,
+                                   bitsPerComponent: 8,
+                                   bitsPerPixel: 32,
+                                   bytesPerRow: Width * 4,
+                                   space: CGColorSpaceCreateDeviceRGB(),
+                                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                                   provider: Provider,
+                                   decode: nil,
+                                   shouldInterpolate: false,
+                                   intent: .defaultIntent) else
+        {
+            throw FilterException(Message: "Could not make image from Metal texture")
+        }
+        return Result
     }
 }

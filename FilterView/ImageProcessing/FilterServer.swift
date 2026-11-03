@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 10/27/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import CoreGraphics
@@ -45,6 +59,7 @@ class FilterServer
         Register(MetalKuwahara.FilterName, MetalKuwahara())
         Register(MPSSobel.FilterName, MPSSobel())
         Register(MPSLaplacian.FilterName, MPSLaplacian())
+        Register(MPSCanny.FilterName, MPSCanny())
         Register(MPSHistogramEqualization.FilterName, MPSHistogramEqualization())
         Register(MPSPyramid.FilterName, MPSPyramid())
         Register(MPSErode.FilterName, MPSErode())
@@ -59,6 +74,8 @@ class FilterServer
         Register(ColorScale.FilterName, ColorScale())
         Register(ColorScaleColor.FilterName, ColorScaleColor())
         Register(BackgroundClear.FilterName, BackgroundClear())
+        Register(AlphaShape.FilterName, AlphaShape())
+        Register(ColorRegion.FilterName, ColorRegion())
         Register(CIGaussianBlur.FilterName, CIGaussianBlur())
         Register(CIMedian.FilterName, CIMedian())
         Register(CIMorphologyGradient.FilterName, CIMorphologyGradient())
@@ -102,6 +119,30 @@ class FilterServer
         Register(CIParallelogramTile.FilterName, CIParallelogramTile())
         Register(CIPerspectiveTile.FilterName, CIPerspectiveTile())
         Register(CIColorPosterize.FilterName, CIColorPosterize())
+        Register(CIConvertRGBToLab.FilterName, CIConvertRGBToLab())
+        Register(CIConvertLabToRGB.FilterName, CIConvertLabToRGB())
+        Register(CITextImageGenerator.FilterName, CITextImageGenerator())
+        Register(CIBumpDistortion.FilterName, CIBumpDistortion())
+        Register(CICircularWrap.FilterName, CICircularWrap())
+        Register(CIDroste.FilterName, CIDroste())
+        Register(CIGlassDistortion.FilterName, CIGlassDistortion())
+        Register(CIGlassLozenge.FilterName, CIGlassLozenge())
+        Register(CILightTunnel.FilterName, CILightTunnel())
+        Register(CIPinchDistortion.FilterName, CIPinchDistortion())
+        Register(CIStretchCrop.FilterName, CIStretchCrop())
+        Register(CITorusLensDistortion.FilterName, CITorusLensDistortion())
+        Register(CITwirlDistortion.FilterName, CITwirlDistortion())
+        Register(CIVortexDistortion.FilterName, CIVortexDistortion())
+        Register(CIPersonSegmentation.FilterName, CIPersonSegmentation())
+        Register(CIFaceDetector.FilterName, CIFaceDetector())
+        #if os(macOS)
+        Register(OpenCVCanny.FilterName, OpenCVCanny())
+        Register(OpenCVBilateral.FilterName, OpenCVBilateral())
+        Register(OpenCVCLAHE.FilterName, OpenCVCLAHE())
+        Register(OpenCVAdaptiveThreshold.FilterName, OpenCVAdaptiveThreshold())
+        Register(OpenCVMorphology.FilterName, OpenCVMorphology())
+        Register(OpenCVBayerDemosaic.FilterName, OpenCVBayerDemosaic())
+        #endif
         let SavedPipelines = SavedPipelineFilter()
         SavedPipelines.Server = self
         Register(SavedPipelineFilter.FilterName, SavedPipelines)

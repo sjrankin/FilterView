@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 10/31/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -21,6 +35,10 @@ struct InputControlBar: View
     var ExportDocument: ImageUtility.PNGImage
     /// Called with the image file the user chose with Load.
     var OnLoad: (URL) -> Void
+    /// True if there is something to reset: the image is not the built-in one, or the input is not Image.
+    var CanReset: Bool
+    /// Called when the user taps Reset Image, which goes back to the built-in test image.
+    var OnReset: () -> Void
     /// Called when the user taps Take Photo.
     var OnTakePhoto: () -> Void
     /// Called when the user taps Save. Must prepare `ExportDocument` and set `ShowExporter`.
@@ -69,16 +87,24 @@ struct InputControlBar: View
     {
         BarLayout
         {
-            Picker("", selection: $InputSource)
+            // The reset button sits with the picker, so the two stay together when the bar goes to two rows.
+            HStack
             {
-                ForEach(ImageInputSources.allCases)
+                Button("Reset Image", systemImage: "arrow.uturn.backward", action: OnReset)
+                    .labelStyle(.iconOnly)
+                    .help("Go back to the built-in test image")
+                    .disabled(!CanReset)
+                Picker("", selection: $InputSource)
                 {
-                    SomeSource in
-                    Text(SomeSource.rawValue).tag(SomeSource)
+                    ForEach(ImageInputSources.allCases)
+                    {
+                        SomeSource in
+                        Text(SomeSource.rawValue).tag(SomeSource)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .frame(minWidth: 220)
             }
-            .pickerStyle(.segmented)
-            .frame(minWidth: 220)
             // The video save dialog is attached here, not to the Save button, because a view can only present one file exporter
             // and Save has the image one. This view is also always present, so the dialog can open when a recording ends
             // because the input was changed.
@@ -220,6 +246,8 @@ struct InputControlBar: View
                     ShowExporter: $Exporting,
                     ExportDocument: ImageUtility.PNGImage(Data: Data()),
                     OnLoad: { _ in },
+                    CanReset: true,
+                    OnReset: {},
                     OnTakePhoto: {},
                     OnSave: {},
                     HasFrame: false,

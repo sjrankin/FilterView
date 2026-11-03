@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 11/3/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import CoreGraphics
@@ -63,12 +77,25 @@ enum PipelineExecutor
 
                     case .Merge:
                         if let Second = Current.Second,
-                           let Other = Outputs[Second],
-                           let Merged = PipelineMerger.Merge(Background: Incoming, Foreground: Other,
-                                                             Mode: MergeModes(rawValue: Current.MergeMode ?? "") ?? .Multiply,
-                                                             Amount: Current.MergeAmount ?? 1.0)
+                           let Other = Outputs[Second]
                         {
-                            Made = Merged
+                            // An overlay such as the sunbeams is made on a canvas the size of the stage it is merged onto.
+                            var Foreground = Other
+                            if let Source = ByID[Second],
+                               Source.Kind == .Filter,
+                               Source.Nested == nil,
+                               !Source.Skipped,
+                               let Name = Source.Filter
+                            {
+                                Foreground = await PipelineCanvas.Foreground(Generator: Filters[Name], Options: Source.Options,
+                                                                             Made: Other, Background: Incoming)
+                            }
+                            if let Merged = PipelineMerger.Merge(Background: Incoming, Foreground: Foreground,
+                                                                 Mode: MergeModes(rawValue: Current.MergeMode ?? "") ?? .Multiply,
+                                                                 Amount: Current.MergeAmount ?? 1.0)
+                            {
+                                Made = Merged
+                            }
                         }
                 }
             }

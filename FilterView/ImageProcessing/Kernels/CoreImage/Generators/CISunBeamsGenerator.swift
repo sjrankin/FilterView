@@ -4,6 +4,20 @@
 //
 //  Created by Stuart Rankin on 11/2/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import Foundation
 import CoreGraphics
@@ -11,7 +25,8 @@ import CoreImage
 import CoreImage.CIFilterBuiltins
 
 /// Makes a sun with beams radiating from it. This is a generator, so it does not use the image's pixels, only its size, which the
-/// result is cut to. Options:
+/// result is cut to. In a pipeline, a sunbeams stage merged onto another stage is made on a canvas the size of that stage (see
+/// `PipelineCanvas`), so the sun and beams keep their size and the center options place them on the target. Options:
 ///   - `CENTERX`, `CENTERY`: where the sun is, as percentages of the width and height (default 50, the middle). Y is measured from the
 ///   top of the image.
 ///   - `COLOR`: the color of the sun and beams, as hexadecimal text (default orange, `FF8000FF`).
@@ -21,7 +36,7 @@ import CoreImage.CIFilterBuiltins
 ///   - `CONTRAST`: contrast of the beams (default 1.375).
 ///   - `TIME`: moves the beams, 0.0 to 1.0, so they can be animated (default 0).
 ///   - `OVERIMAGE`: `true` puts the beams over the image; the default `false` shows only the beams.
-class CISunBeamsGenerator: ImageFilter
+class CISunBeamsGenerator: OverlayGenerator
 {
     static let FilterName = "CI Sunbeams Generator"
     

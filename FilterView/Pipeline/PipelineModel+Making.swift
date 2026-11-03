@@ -4,6 +4,20 @@
 //
 //  Created by Claude/Stuart Rankin on 11/2/26.
 //
+//  Copyright 2026 Stuart Rankin
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 import SwiftUI
 import CoreGraphics
@@ -80,7 +94,17 @@ extension PipelineModel
                 if !Current.Skipped,
                    let Other = OutputOf(Current.Second)
                 {
-                    if let Merged = PipelineMerger.Merge(Background: Incoming, Foreground: Other, Mode: Current.MergeMode,
+                    // An overlay such as the sunbeams is made on a canvas the size of the stage it is merged onto.
+                    var Foreground = Other
+                    if let Source = StageFor(Current.Second),
+                       Source.Kind == .Filter,
+                       !Source.Skipped,
+                       let Selection = Source.Selection
+                    {
+                        Foreground = await PipelineCanvas.Foreground(Generator: Server?.GetFilter(Selection.Filter),
+                                                                     Options: Selection.Options, Made: Other, Background: Incoming)
+                    }
+                    if let Merged = PipelineMerger.Merge(Background: Incoming, Foreground: Foreground, Mode: Current.MergeMode,
                                                          Amount: Current.MergeAmount)
                     {
                         Made = Merged
