@@ -52,7 +52,11 @@ extension PipelineModel
                     return "Original"
 
                 case .Filter:
-                    return Selection?.DisplayName ?? "Passthrough"
+                    if let Selection = Selection
+                    {
+                        return Selection.IsPipeline ? "Pipeline: \(Selection.DisplayName)" : Selection.DisplayName
+                    }
+                    return "Passthrough"
 
                 case .Merge:
                     return "Merge \(Input ?? 0) + \(Second ?? 0): \(MergeMode.Title)"

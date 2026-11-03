@@ -34,4 +34,10 @@ final class PipelineModel
     /// Stages whose images must be made again (with everything after them).
     var Dirty = Set<Int>()
     var IsComputing = false
+    /// The name of the saved pipeline being edited. `nil` for a pipeline that has not been saved or loaded.
+    var CurrentName: String? = nil
+    /// The file the pipeline was loaded from or last saved to. Saving over it is allowed; saving over any other file is not.
+    var CurrentURL: URL? = nil
+    /// Something the user needs to be told, such as why a pipeline could not be added. Shown in the main window.
+    var Problem: String? = nil
 }

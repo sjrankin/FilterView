@@ -10,8 +10,9 @@ import Foundation
 /// One node in the filter tree. A node with `Children` is a group; a node with `Filter` is a leaf that runs a filter.
 struct FilterNode: Codable, Identifiable, Sendable
 {
-    /// Identifies the node for SwiftUI. Created at decode time, never stored in JSON.
-    let NodeID = UUID()
+    /// Identifies the node for SwiftUI. Created at decode time, never stored in JSON. Nodes made for saved pipelines are given the
+    /// identity of their file, so a selection survives the tree being built again.
+    var NodeID = UUID()
 
     /// Label shown in the UI.
     let Name: String

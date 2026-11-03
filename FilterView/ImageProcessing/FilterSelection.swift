@@ -24,6 +24,12 @@ struct FilterSelection: Hashable, Sendable
     /// The options the user can change for this entry. Their current values are in `Options`.
     let Parameters: [FilterParameter]
 
+    /// True if this selection runs a saved pipeline instead of a single filter.
+    var IsPipeline: Bool
+    {
+        Filter == SavedPipelineFilter.FilterName
+    }
+
     /// The same selection with one option changed.
     func Updating(Key: String, Value: String) -> FilterSelection
     {

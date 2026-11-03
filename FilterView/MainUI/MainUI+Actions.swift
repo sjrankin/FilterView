@@ -108,6 +108,12 @@ extension MainUI
         {
             return
         }
+        // A saved pipeline can be a stage of another, but not of itself.
+        if let Problem = Pipeline.NestingProblem(for: Selection)
+        {
+            Pipeline.Problem = Problem
+            return
+        }
         Task
         {
             await Pipeline.Add(Selection)

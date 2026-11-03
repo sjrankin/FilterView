@@ -54,6 +54,15 @@ struct PipelineControls: View
                 Spacer()
             }
         }
+        .alert("Cannot Add Pipeline",
+               isPresented: Binding(get: { Pipeline.Problem != nil }, set: { _ in Pipeline.Problem = nil }))
+        {
+            Button("OK") {}
+        }
+        message:
+        {
+            Text(Pipeline.Problem ?? "")
+        }
     }
 }
 #endif

@@ -36,6 +36,15 @@ struct ImagePane: View
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .foregroundStyle(.white)
+                    // Filters can make pixels transparent. As with a still image, a checkerboard shows through them instead of the
+                    // black behind, where black pixels would not be seen. The placeholder symbol is drawn on plain black.
+                    .background
+                    {
+                        if LiveImage != nil
+                        {
+                            Checkerboard()
+                        }
+                    }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black)
             }

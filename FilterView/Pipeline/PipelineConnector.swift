@@ -13,7 +13,7 @@ enum PipelineConnector
 {
     /// Draws an arrow from one stage's image to another's. A stage under the one it follows gets a straight line down from the
     /// bottom edge of the image to the top edge of the next. Otherwise the line leaves the right edge, runs through the space
-    /// between the columns, and enters the left edge of the next stage.
+    /// between the columns, and enters the left edge of the next stage. Where it turns depends on whether it goes up or down.
     static func Draw(_ Context: GraphicsContext, _ From: PipelineModel.GridPoint, _ To: PipelineModel.GridPoint)
     {
         let A = PipelineMetrics.ImageRect(From)
@@ -36,7 +36,10 @@ enum PipelineConnector
             Line.move(to: Start)
             if abs(Start.y - End.y) > 0.5
             {
-                let Channel = A.maxX + PipelineMetrics.GapWidth / 2
+                // A line going up turns in the gap just before the stage it feeds, so it runs along its own row. Turning in the gap
+                // after its source would send it along the row above, under the stages between, where it looks like it feeds the
+                // first of them. A line going down turns after its source and runs along its target's row.
+                let Channel = From.Row > To.Row ? B.minX - PipelineMetrics.GapWidth / 2 : A.maxX + PipelineMetrics.GapWidth / 2
                 Line.addLine(to: CGPoint(x: Channel, y: Start.y))
                 Line.addLine(to: CGPoint(x: Channel, y: End.y))
             }

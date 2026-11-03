@@ -21,6 +21,8 @@ struct PipelineWindow: View
     @State private var ShowExporter = false
     @State private var ExportDocument = ImageUtility.PNGImage(Data: Data())
     @State private var MergeAsked: MergeRequest? = nil
+    @State private var EditAsked: EditRequest? = nil
+    @State private var ShowSavePipeline = false
     @State private var ConfirmClear = false
 
     var body: some View
@@ -60,7 +62,8 @@ struct PipelineWindow: View
                             let Frame = PipelineMetrics.ImageRect(Point)
                             StageView(Stage: Stage,
                                       IsFinal: Stage.id == Tip && Stage.Kind != .Original,
-                                      OnMerge: { MergeAsked = MergeRequest(id: Stage.id) })
+                                      OnMerge: { MergeAsked = MergeRequest(id: Stage.id) },
+                                      OnEdit: { EditAsked = EditRequest(id: Stage.id) })
                                 .offset(x: Frame.minX, y: Frame.minY)
                         }
                     }
@@ -71,7 +74,13 @@ struct PipelineWindow: View
             Divider()
             HStack
             {
-                Button("Save")
+                Button("Save Pipeline…")
+                {
+                    ShowSavePipeline = true
+                }
+                .disabled(Pipeline.Stages.count < 2)
+                .help("Save the filters and all of their options, to use again or to use inside another pipeline.")
+                Button("Export Image")
                 {
                     if let Final = Pipeline.FinalImage,
                        let Encoded = ImageUtility.ImageEncoder.PNGData(Final)
@@ -103,6 +112,13 @@ struct PipelineWindow: View
                 }
                 .disabled(Pipeline.Stages.count < 2)
                 Spacer()
+                if let Name = Pipeline.CurrentName
+                {
+                    Text(Name)
+                        .bold()
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                }
                 Button("Close")
                 {
                     DismissWindow(id: PipelineWindow.ID)
@@ -127,6 +143,18 @@ struct PipelineWindow: View
         {
             Request in
             MergeSheet(Source: Request.id)
+        }
+        .sheet(item: $EditAsked)
+        {
+            Request in
+            if let Selection = Pipeline.StageFor(Request.id)?.Selection
+            {
+                StageOptionsSheet(StageID: Request.id, Selection: Selection)
+            }
+        }
+        .sheet(isPresented: $ShowSavePipeline)
+        {
+            SavePipelineSheet()
         }
         .onAppear
         {

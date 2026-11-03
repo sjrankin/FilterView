@@ -195,6 +195,8 @@ extension PipelineModel
     {
         Clear()
         IgnoredSourceID = nil
+        CurrentName = nil
+        CurrentURL = nil
     }
 
     /// Makes the final image the main image. The pipeline is left as it is, so it can be changed further.

@@ -15,7 +15,15 @@ struct StageView: View
     let IsFinal: Bool
     /// Called when the user chooses Merge With.
     let OnMerge: () -> Void
+    /// Called when the user taps Edit Filter.
+    let OnEdit: () -> Void
     @Environment(PipelineModel.self) private var Pipeline
+
+    /// True if the stage's filter has options to edit.
+    private var CanEdit: Bool
+    {
+        Stage.Kind == .Filter && !(Stage.Selection?.Parameters.isEmpty ?? true)
+    }
 
     var body: some View
     {
@@ -57,6 +65,19 @@ struct StageView: View
                     .background(.tint, in: .capsule)
                     .shadow(radius: 2)
                     .padding(8)
+            }
+            .overlay(alignment: .bottom)
+            {
+                if CanEdit
+                {
+                    Button("Edit Filter", systemImage: "slider.horizontal.3")
+                    {
+                        OnEdit()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .padding(6)
+                }
             }
             .overlay(alignment: .topTrailing)
             {
@@ -144,6 +165,13 @@ struct StageView: View
             OnMerge()
         }
         .disabled(Pipeline.MergeTargets(for: Stage.id).isEmpty)
+        if CanEdit
+        {
+            Button("Edit Filter…")
+            {
+                OnEdit()
+            }
+        }
         if Stage.Kind == .Filter
         {
             Button("Use Selected Filter")

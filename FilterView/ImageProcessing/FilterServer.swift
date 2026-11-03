@@ -102,6 +102,9 @@ class FilterServer
         Register(CIParallelogramTile.FilterName, CIParallelogramTile())
         Register(CIPerspectiveTile.FilterName, CIPerspectiveTile())
         Register(CIColorPosterize.FilterName, CIColorPosterize())
+        let SavedPipelines = SavedPipelineFilter()
+        SavedPipelines.Server = self
+        Register(SavedPipelineFilter.FilterName, SavedPipelines)
     }
 
     /// Adds a filter, remembering the order in which it was added.

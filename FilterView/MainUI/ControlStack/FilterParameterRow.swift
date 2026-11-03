@@ -23,12 +23,19 @@ struct FilterParameterRow: View
     @FocusState private var IsTyping: Bool
     @Environment(\.self) private var Environment
 
-    init(Filter: String, Parameter: FilterParameter, OnChange: @escaping (String) -> Void)
+    /// False when the row edits a copy of the options (a stage of a pipeline), so the values the main window remembers are left alone.
+    private let Persist: Bool
+
+    /// - Parameter InitialValue: The value to start from. If `nil`, the saved value of the filter is used.
+    /// - Parameter Persist: True to remember each change as the filter's saved value.
+    init(Filter: String, Parameter: FilterParameter, InitialValue: String? = nil, Persist: Bool = true,
+         OnChange: @escaping (String) -> Void)
     {
         self.Filter = Filter
         self.Parameter = Parameter
+        self.Persist = Persist
         self.OnChange = OnChange
-        let Saved = FilterOptionStore.Shared.Value(Filter: Filter, Parameter: Parameter)
+        let Saved = InitialValue ?? FilterOptionStore.Shared.Value(Filter: Filter, Parameter: Parameter)
         _Current = State(initialValue: Saved)
         let Start = Double(Saved) ?? Double(Parameter.Default) ?? 0
         _Dragged = State(initialValue: Start)
@@ -200,7 +207,10 @@ struct FilterParameterRow: View
     private func Commit(_ Value: String)
     {
         Current = Value
-        FilterOptionStore.Shared.Save(Filter: Filter, Key: Parameter.Key, Value: Value)
+        if Persist
+        {
+            FilterOptionStore.Shared.Save(Filter: Filter, Key: Parameter.Key, Value: Value)
+        }
         OnChange(Value)
     }
 }
