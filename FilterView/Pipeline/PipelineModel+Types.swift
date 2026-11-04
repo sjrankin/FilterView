@@ -32,6 +32,10 @@ extension PipelineModel
         case Filter
         /// Combines two images.
         case Merge
+        /// Divides the image into regions (`Layout`). Its image is the one it takes; the regions' lines of stages start under it.
+        case Split
+        /// Puts the final image of each region's line of stages into its place in the picture. See `PipelineModel.AddSplitter`.
+        case Join
     }
 
     /// One step of the pipeline.
@@ -46,6 +50,11 @@ extension PipelineModel
         var Input: Int? = nil
         /// A merge's second image, merged onto the first.
         var Second: Int? = nil
+        /// How a `.Split` or `.Join` stage divides the image.
+        var Layout: SplitLayouts? = nil
+        /// For a `.Join`: the last stage of each region's line, in region order. Kept up to date as stages are added to and removed from
+        /// the lines.
+        var Regions: [Int] = []
         /// True for a stage made by `Diverge`: it is drawn under the stage it takes its image from.
         var Under = false
         var MergeMode = MergeModes.Multiply
@@ -74,6 +83,12 @@ extension PipelineModel
 
                 case .Merge:
                     return "Merge \(Input ?? 0) + \(Second ?? 0): \(MergeMode.Title)"
+
+                case .Split:
+                    return "Partial Splitter: \(Layout?.Title ?? "")"
+
+                case .Join:
+                    return "Join Regions " + Regions.map{String($0)}.joined(separator: ", ")
             }
         }
     }

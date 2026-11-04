@@ -115,6 +115,25 @@ extension PipelineModel
                     }
                 }
 
+            case .Split:
+                // The regions' lines start from this image; the split itself changes nothing.
+                break
+
+            case .Join:
+                if !Current.Skipped,
+                   let Layout = Current.Layout
+                {
+                    if let Combined = await SplitCompositor.ComposeAsync(Background: Incoming, Layout: Layout,
+                                                                         Regions: Current.Regions.map{OutputOf($0)})
+                    {
+                        Made = Combined
+                    }
+                    else
+                    {
+                        DidFail = true
+                    }
+                }
+
             case .Original:
                 break
         }

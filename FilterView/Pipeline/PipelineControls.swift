@@ -35,6 +35,8 @@ struct PipelineControls: View
     var OnSet: () -> Void
     /// Called when the user taps Conditional.
     var OnConditional: () -> Void
+    /// Called when the user chooses a layout from the Partial Splitter menu.
+    var OnSplit: (SplitLayouts) -> Void
 
     var body: some View
     {
@@ -65,6 +67,21 @@ struct PipelineControls: View
                     OnConditional()
                 }
                 .disabled(!Pipeline.IsOpen)
+                // One line of stages for each part of the image, put back together at the end.
+                Menu("Partial Splitter", systemImage: "rectangle.split.2x2")
+                {
+                    ForEach(SplitLayouts.allCases)
+                    {
+                        Layout in
+                        Button(Layout.Title, systemImage: Layout.SymbolName)
+                        {
+                            OnSplit(Layout)
+                        }
+                    }
+                }
+                .disabled(!Pipeline.IsOpen)
+                .fixedSize()
+                .help("Divide the image into parts, give each part its own filters, and join them again")
                 Spacer()
             }
         }

@@ -27,6 +27,10 @@ struct ImageView: View
     var DisplayImage: Image
     var Server: FilterServer? = nil
     var Selection: FilterSelection? = nil
+    /// The regions and their filters, when the image is divided. Used instead of `Selection`.
+    var Split: SplitSetup? = nil
+    /// Called with the region the user taps while the image is divided.
+    var OnSelectRegion: ((Int) -> Void)? = nil
     /// Changes whenever the parent supplies a different image, which restarts the filter task.
     var SourceID = UUID()
     /// Called with how long the filter took to produce the image (from the call to the finished image), or `nil` if there is no
@@ -43,14 +47,30 @@ struct ImageView: View
             ((FilteredFor == SourceID ? FilteredImage : nil) ?? DisplayImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
+                .overlay
+                {
+                    // The overlay is the size of the picture, so its lines are exactly where the regions are.
+                    if let Split = Split
+                    {
+                        SplitRegionOverlay(Setup: Split)
+                        {
+                            OnSelectRegion?($0)
+                        }
+                    }
+                }
                 .foregroundStyle(.white)
                 .background { ImageBackgroundView() }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black, ignoresSafeAreaEdges: [])
-        .task(id: TaskKey(Selection: Selection, SourceID: SourceID))
+        .task(id: TaskKey(Selection: Selection, Split: Split, SourceID: SourceID))
         {
             let Current = SourceID
+            if let Split = Split
+            {
+                await RenderSplit(Split, For: Current)
+                return
+            }
             guard let Selection = Selection else
             {
                 FilteredImage = nil
@@ -86,10 +106,48 @@ struct ImageView: View
     }
 }
 
+extension ImageView
+{
+    /// Filters the image region by region and shows the result.
+    /// - Parameter Setup: The regions and their filters.
+    /// - Parameter Current: The `SourceID` the image belongs to.
+    @MainActor fileprivate func RenderSplit(_ Setup: SplitSetup, For Current: UUID) async
+    {
+        guard Setup.HasFilters,
+              let Server = Server,
+              let Source = ImageUtility.ImageToCGImage(DisplayImage) else
+        {
+            FilteredImage = nil
+            OnRendered?(nil)
+            return
+        }
+        let StartTime = ContinuousClock.now
+        do
+        {
+            let Result = try await SplitRenderer.Render(Source, Setup: Setup, Server: Server)
+            if !Task.isCancelled
+            {
+                FilteredImage = ImageUtility.CGImageToImage(Result)
+                FilteredFor = Current
+                OnRendered?(ContinuousClock.now - StartTime)
+            }
+        }
+        catch
+        {
+            FilteredImage = nil
+            OnRendered?(nil)
+            #if DEBUG
+            print("Split filters failed: \(error)")
+            #endif
+        }
+    }
+}
+
 /// Identifies one filtering job: re-run when either the filter or the source image changes.
 private struct TaskKey: Hashable
 {
     let Selection: FilterSelection?
+    let Split: SplitSetup?
     let SourceID: UUID
 }
 

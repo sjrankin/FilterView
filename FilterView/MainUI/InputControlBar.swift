@@ -33,8 +33,10 @@ struct InputControlBar: View
     @Binding var ShowExporter: Bool
     /// The filtered image to save.
     var ExportDocument: ImageUtility.PNGImage
-    /// Called with the image file the user chose with Load.
-    var OnLoad: (URL) -> Void
+    /// Called with the image files the user chose with Load. More than one starts batch mode.
+    var OnLoad: ([URL]) -> Void
+    /// How many images are loaded in batch mode, or 0 when it is not in use. Save then saves them all.
+    var BatchCount = 0
     /// True if there is something to reset: the image is not the built-in one, or the input is not Image.
     var CanReset: Bool
     /// Called when the user taps Reset Image, which goes back to the built-in test image.
@@ -165,7 +167,8 @@ struct InputControlBar: View
                     {
                         ShowImporter = true
                     }
-                    .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image])
+                    .help("Choose one image, or several to work on them as a batch")
+                    .fileImporter(isPresented: $ShowImporter, allowedContentTypes: [.image], allowsMultipleSelection: true)
                     {
                         Result in
                         switch Result
@@ -189,7 +192,7 @@ struct InputControlBar: View
                     .disabled(!CameraPicker.IsAvailable)
                     #endif
                 }
-                Button("Save")
+                Button(BatchCount > 1 && InputSource == .Image ? "Save All" : "Save")
                 {
                     if InputSource == .Video
                     {

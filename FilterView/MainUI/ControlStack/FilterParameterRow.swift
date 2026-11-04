@@ -155,22 +155,9 @@ struct FilterParameterRow: View
                 VStack(alignment: .leading)
                 {
                     Text(Parameter.Title)
-                    // Long titles make a segmented control wider than the panel and push the layout out of shape, so those
-                    // choices go in a menu.
-                    if (Parameter.Choices ?? []).reduce(0, { $0 + $1.Title.count }) > 24
-                    {
-                        Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
-                        {
-                            ForEach(Parameter.Choices ?? [], id: \.Value)
-                            {
-                                Choice in
-                                Text(Choice.Title).tag(Choice.Value)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .labelsHidden()
-                    }
-                    else
+                    // A segmented control is as wide as its titles need, and one wider than the panel pushes the layout out of
+                    // shape. So it is used where it fits, and a menu where it does not.
+                    ViewThatFits(in: .horizontal)
                     {
                         Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
                         {
@@ -181,6 +168,16 @@ struct FilterParameterRow: View
                             }
                         }
                         .pickerStyle(.segmented)
+                        .labelsHidden()
+                        Picker(Parameter.Title, selection: Binding(get: {Current}, set: {Commit($0)}))
+                        {
+                            ForEach(Parameter.Choices ?? [], id: \.Value)
+                            {
+                                Choice in
+                                Text(Choice.Title).tag(Choice.Value)
+                            }
+                        }
+                        .pickerStyle(.menu)
                         .labelsHidden()
                     }
                 }

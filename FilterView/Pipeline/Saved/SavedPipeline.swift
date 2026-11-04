@@ -122,6 +122,10 @@ struct SavedStage: Codable, Hashable, Sendable
         case Filter
         /// Combines two images.
         case Merge
+        /// Divides the image into regions (`Layout`). It passes its image on; the regions' lines of stages start under it.
+        case Split
+        /// Puts the last stage of each region's line (`Regions`) in the region's place in the picture.
+        case Join
     }
 
     /// The number of the stage, as the other stages refer to it.
@@ -146,6 +150,11 @@ struct SavedStage: Codable, Hashable, Sendable
     var Parameters: [FilterParameter]?
     /// Another pipeline run as this stage's filter.
     var Nested: SavedPipeline?
+
+    /// How a split or join divides the image, as `SplitLayouts.rawValue`.
+    var Layout: String?
+    /// A join's inputs: the last stage of each region's line, in region order.
+    var Regions: [Int]?
 
     /// A merge's mode, as `MergeModes.rawValue`.
     var MergeMode: String?

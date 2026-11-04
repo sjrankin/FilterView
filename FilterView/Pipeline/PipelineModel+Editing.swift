@@ -78,6 +78,7 @@ extension PipelineModel
     func Delete(_ ID: Int)
     {
         guard ID != 0,
+              !IsPartOfSplitter(ID),
               let Gone = StageFor(ID) else
         {
             return
@@ -85,6 +86,12 @@ extension PipelineModel
         let Replacement = Gone.Input ?? 0
         for Where in Stages.indices
         {
+            // A join takes the last stage of each region's line. If that stage goes, it takes the one before it.
+            if let Region = Stages[Where].Regions.firstIndex(of: ID)
+            {
+                Stages[Where].Regions[Region] = Replacement
+                Dirty.insert(Stages[Where].id)
+            }
             if Stages[Where].Input == ID
             {
                 Stages[Where].Input = Replacement
@@ -105,7 +112,9 @@ extension PipelineModel
     /// `UseSelectedFilter`.
     func Diverge(_ ID: Int)
     {
-        guard StageFor(ID) != nil else
+        guard let Found = StageFor(ID),
+              // The lines under a splitter are the regions'.
+              Found.Kind != .Split else
         {
             return
         }
@@ -136,7 +145,9 @@ extension PipelineModel
     /// passes the image through, which `UseSelectedFilter` can give a filter later.
     func InsertFilter(After ID: Int, With Selection: FilterSelection?)
     {
-        guard StageFor(ID) != nil,
+        guard let After = StageFor(ID),
+              // The splitter's own image is only the start of the regions' lines, so nothing goes between it and them.
+              After.Kind != .Split,
               Accepts(Selection) else
         {
             return
@@ -147,6 +158,8 @@ extension PipelineModel
             Stages[Where].Input = NewID
             Dirty.insert(Stages[Where].id)
         }
+        // If the stage was the end of a region's line, the new stage is the end now.
+        ReplaceRegionEnd(ID, With: NewID)
         Stages.append(Stage(id: NewID, Kind: .Filter, Selection: Selection, Input: ID))
         Dirty.insert(NewID)
         Kick()
@@ -161,6 +174,7 @@ extension PipelineModel
     {
         guard let Target = StageFor(ID),
               Target.Kind != .Original,
+              Target.Kind != .Join,
               let Source = Target.Input,
               let Where = Stages.firstIndex(where: {$0.id == ID}),
               Accepts(Selection) else
@@ -202,7 +216,9 @@ extension PipelineModel
         return Stages.filter
         {
             Candidate in
-            Candidate.id > Threshold
+            // The splitter's image only starts the regions' lines, so nothing is merged into it.
+            Candidate.Kind != .Split
+                && Candidate.id > Threshold
                 && !Upstream.contains(Candidate.id)
                 // The merged image replaces this one for the stages after it, so none of them may lead back to `ID`.
                 && !MainLineConsumers(of: Candidate.id).contains{Upstream.contains($0.id)}
@@ -250,6 +266,7 @@ extension PipelineModel
             Stages[Where].Input = NewID
             Dirty.insert(Stages[Where].id)
         }
+        ReplaceRegionEnd(Target, With: NewID)
         Stages.append(Stage(id: NewID, Kind: .Merge, Input: Target, Second: Source, MergeMode: Mode, MergeAmount: Amount))
         Dirty.insert(NewID)
         Kick()

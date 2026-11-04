@@ -31,12 +31,17 @@ struct ImagePane: View
     var SourceImage: Image
     var Server: FilterServer?
     var Selection: FilterSelection?
+    /// The regions and their filters, when the image is divided. Used instead of `Selection`.
+    var Split: SplitSetup? = nil
+    /// Called with the region the user taps while the image is divided.
+    var OnSelectRegion: (Int) -> Void = { _ in }
     /// Changes whenever there is a different source image, which makes the image view filter again.
     var SourceID: UUID
     /// Called with how long the filter took to render the image, or `nil` if there was no filter or it failed.
     var OnRendered: (Duration?) -> Void
-    /// Called when an image file is dropped on the image (macOS only), with the file and its loaded image.
-    var OnDropped: (URL, CGImage) -> Void
+    /// Called when image files are dropped on the image (macOS only). Several make a batch.
+    var OnDropped: ([URL]) -> Void
+    @Environment(BatchModel.self) private var Batch
     @State private var IsDropTargeted = false
 
     var body: some View
@@ -49,6 +54,15 @@ struct ImagePane: View
                 (LiveImage ?? Image(systemName: "video"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .overlay
+                    {
+                        // The regions can be chosen on live video too. The overlay is the size of the picture.
+                        if LiveImage != nil,
+                           let Split = Split
+                        {
+                            SplitRegionOverlay(Setup: Split, OnSelect: OnSelectRegion)
+                        }
+                    }
                     .foregroundStyle(.white)
                     // Filters can make pixels transparent. As with a still image, the background chosen in the settings shows through
                     // them. The placeholder symbol is drawn on plain black.
@@ -64,21 +78,37 @@ struct ImagePane: View
             }
             else
             {
-                ImageView(DisplayImage: SourceImage,
-                          Server: Server,
-                          Selection: Selection,
-                          SourceID: SourceID,
-                          OnRendered: OnRendered)
+                Group
+                {
+                    if Batch.IsActive
+                    {
+                        // Batch mode: the images are filtered by the grid, so there is no render time to report.
+                        BatchGrid(Server: Server, Selection: Selection, Split: Split)
+                            .onAppear
+                            {
+                                OnRendered(nil)
+                            }
+                    }
+                    else
+                    {
+                        ImageView(DisplayImage: SourceImage,
+                                  Server: Server,
+                                  Selection: Selection,
+                                  Split: Split,
+                                  OnSelectRegion: OnSelectRegion,
+                                  SourceID: SourceID,
+                                  OnRendered: OnRendered)
+                    }
+                }
                 #if os(macOS)
                 .dropDestination(for: URL.self)
                 {
                     URLs, _ in
-                    guard let FirstImage = URLs.first,
-                          let Dropped = ImageUtility.LoadImage(from: FirstImage) else
+                    guard !URLs.isEmpty else
                     {
                         return false
                     }
-                    OnDropped(FirstImage, Dropped)
+                    OnDropped(URLs)
                     return true
                 }
                 isTargeted:
@@ -107,5 +137,6 @@ struct ImagePane: View
               Selection: nil,
               SourceID: UUID(),
               OnRendered: { _ in },
-              OnDropped: { _, _ in })
+              OnDropped: { _ in })
+        .environment(BatchModel())
 }

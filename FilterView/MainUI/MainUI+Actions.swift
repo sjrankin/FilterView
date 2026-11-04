@@ -27,6 +27,7 @@ extension MainUI
     /// again from the test image.
     func ResetToBuiltInImage()
     {
+        Batch.Clear()
         SourceImage = Image("Hana")
         SourceName = "Built-in"
         SourceSize = nil
@@ -51,6 +52,7 @@ extension MainUI
         {
             return
         }
+        Batch.Clear()
         SourceImage = ImageUtility.CGImageToImage(Loaded)
         SourceName = NewImage.lastPathComponent
         SourceSize = CGSize(width: Loaded.width, height: Loaded.height)
@@ -89,14 +91,44 @@ extension MainUI
         InputSource == .Video ? "Live video" : SourceName
     }
 
-    /// Makes an image file dropped on the image area (macOS) the source image.
-    /// - Parameter File: The dropped file.
-    /// - Parameter Loaded: The image loaded from the file.
-    func UseDroppedImage(_ File: URL, _ Loaded: CGImage)
+    /// Uses image files the user chose with Load or dropped on the image area (macOS). One file is the source image; several start batch
+    /// mode, where they are shown in a grid, filtered together, and saved together.
+    /// - Parameter Files: The files. Any that are not images are left out.
+    func LoadImages(_ Files: [URL])
     {
-        SourceImage = ImageUtility.CGImageToImage(Loaded)
-        SourceName = File.lastPathComponent
-        SourceSize = CGSize(width: Loaded.width, height: Loaded.height)
+        if Files.count == 1,
+           let Only = Files.first
+        {
+            ImportLoadedImage(Only)
+            return
+        }
+        Task
+        {
+            let Loaded = await Batch.Make(from: Files)
+            switch Loaded.count
+            {
+                case 0:
+                    return
+
+                case 1:
+                    ImportLoadedImage(Loaded[0].URL)
+
+                default:
+                    Batch.Start(Loaded)
+            }
+        }
+    }
+
+    /// Makes the focused image of the batch the current source image, so its name and size are shown and the pipeline starts from it.
+    func UseFocusedBatchImage()
+    {
+        guard let Current = Batch.Focused else
+        {
+            return
+        }
+        SourceImage = ImageUtility.CGImageToImage(Current.Preview)
+        SourceName = Current.Name
+        SourceSize = Current.PixelSize
         SourceID = UUID()
     }
 
@@ -110,6 +142,7 @@ extension MainUI
         {
             return
         }
+        Batch.Clear()
         Task
         {
             do
@@ -125,6 +158,52 @@ extension MainUI
         SourceSize = CGSize(width: Photo.width, height: Photo.height)
         SourceName = "Camera photo"
         SourceID = UUID()
+    }
+
+    /// What filters an image right now: each region's filter if the image is divided, otherwise the selected filter. `nil` if there is none.
+    var ActiveTransform: BatchModel.Transform?
+    {
+        BatchModel.FilterTransform(Server: Filters, Selection: Selection, Split: Split)
+    }
+
+    /// Divides the image into regions, or changes how it is divided. Choosing the layout already in use puts the image back together.
+    /// - Parameter Layout: The layout whose button was tapped.
+    func ChooseSplit(_ Layout: SplitLayouts)
+    {
+        guard var Current = Split else
+        {
+            // The filter chosen now goes to the first region, so the picture does not change until another region gets one.
+            Split = SplitSetup(Layout: Layout, First: Selection)
+            return
+        }
+        guard Current.Layout != Layout else
+        {
+            Split = nil
+            return
+        }
+        Current.ChangeLayout(to: Layout)
+        Split = Current
+        Selection = Current.ActiveSelection
+    }
+
+    /// Removes every region's filter and puts the image back together. No filter is left selected, so the image shows as it is.
+    func RemoveRegions()
+    {
+        Split = nil
+        Selection = nil
+    }
+
+    /// Makes a region the one the filter tree and options edit.
+    /// - Parameter Index: The region the user tapped.
+    func SelectRegion(_ Index: Int)
+    {
+        guard var Current = Split else
+        {
+            return
+        }
+        Current.Activate(Index)
+        Split = Current
+        Selection = Current.ActiveSelection
     }
 
     /// Adds the selected filter to the pipeline (the Set button).
@@ -143,6 +222,16 @@ extension MainUI
         Task
         {
             await Pipeline.Add(Selection)
+        }
+    }
+
+    /// Adds a Partial Splitter to the pipeline: one line of stages for each region, joined at the end.
+    /// - Parameter Layout: How to divide the image.
+    func AddSplitterToPipeline(_ Layout: SplitLayouts)
+    {
+        Task
+        {
+            await Pipeline.AddSplitter(Layout)
         }
     }
 
@@ -182,25 +271,31 @@ extension MainUI
         InputSource = .Image
     }
 
-    /// Applies the selected filter (if any) to the image, encodes it as PNG, and shows the save dialog.
+    /// Applies the selected filter (if any) to the image, encodes it as PNG, and shows the save dialog. In batch mode it saves every image of
+    /// the batch instead.
     func PrepareExport() async
     {
+        if Batch.IsActive
+        {
+            // Batch mode saves every image beside its original; there is no single file to choose.
+            await Batch.SaveAll(From: .Main, Transform: ActiveTransform)
+            return
+        }
         guard var Result = ImageUtility.ImageToCGImage(SourceImage) else
         {
             return
         }
-        if let Selection = Selection,
-           let Server = Filters
+        if let Transform = ActiveTransform
         {
             do
             {
-                Result = try await Server.Run(Filter: Selection.Filter, With: Result, Selection.Options)
+                Result = try await Transform(Result)
             }
             catch
             {
                 // The unfiltered image is saved instead.
                 #if DEBUG
-                print("Filter \(Selection.Filter) failed while saving: \(error)")
+                print("Filter failed while saving: \(error)")
                 #endif
             }
         }
@@ -236,26 +331,26 @@ extension MainUI
                     LiveSize = FrameSize
                 }
                 var Result = Frame
-                // The selection is read for every frame, so changing the filter applies at once with no restart.
-                if let Selection = Selection,
-                   let Server = Filters
+                // The filter (or the regions' filters) is read for every frame, so changing it applies at once with no restart.
+                let Transform = ActiveTransform
+                if let Transform = Transform
                 {
                     do
                     {
-                        Result = try await Server.Run(Filter: Selection.Filter, With: Frame, Selection.Options)
+                        Result = try await Transform(Frame)
                     }
                     catch
                     {
                         // The unfiltered frame is shown instead. Printed for every frame that fails, as the filter is tried on each.
                         #if DEBUG
-                        print("Filter \(Selection.Filter) failed on a live frame: \(error)")
+                        print("Filter failed on a live frame: \(error)")
                         #endif
                     }
                 }
                 LiveImage = ImageUtility.CGImageToImage(Result)
                 LiveSource = ImageUtility.CGImageToImage(Frame)
                 // Per frame: filtering plus converting the result for display.
-                RenderTime = Selection == nil ? nil : ContinuousClock.now - StartTime
+                RenderTime = Transform == nil ? nil : ContinuousClock.now - StartTime
                 if IsRecording
                 {
                     await Recorder.Append(Result)

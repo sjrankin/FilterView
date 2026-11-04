@@ -39,6 +39,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate
     
     /// The pipeline of filters, shared by the main window and the Pipeline window.
     @State private var Pipeline = PipelineModel()
+    /// The images of batch mode, shared by the main window and the Pipeline window.
+    @State private var Batch = BatchModel()
 
     var body: some Scene
     {
@@ -46,12 +48,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate
         {
             ContentView()
                 .environment(Pipeline)
+                .environment(Batch)
         }
 #if os(macOS)
         Window("Pipeline", id: PipelineWindow.ID)
         {
             PipelineWindow()
                 .environment(Pipeline)
+                .environment(Batch)
         }
         .defaultSize(width: 900, height: 420)
 #endif

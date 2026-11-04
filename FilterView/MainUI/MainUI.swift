@@ -30,6 +30,8 @@ struct MainUI: View
     var FilterTreeData: FilterNode?
     // These are not private because the functions in `MainUI+Actions.swift` use them.
     @State var Selection: FilterSelection? = nil
+    /// The image divided into regions that each have their own filter. `nil` when it is not divided.
+    @State var Split: SplitSetup? = nil
     @State var SourceImage = Image("Hana")
     @State var SourceID = UUID()
     /// Where `SourceImage` came from: the built-in image, a file name, or a camera photo. Live video is described
@@ -47,6 +49,8 @@ struct MainUI: View
     @State var ShowCamera = false
     /// The filter pipeline. Only used on macOS, where the Pipeline window is.
     @Environment(PipelineModel.self) var Pipeline
+    /// The images of batch mode, shared with the Pipeline window.
+    @Environment(BatchModel.self) var Batch
     @State var PanelWidth: CGFloat = 300
     /// The panel's height when it is under the image (narrow screens).
     @State var PanelHeight: CGFloat = 300
@@ -97,9 +101,11 @@ struct MainUI: View
                           SourceImage: SourceImage,
                           Server: Filters,
                           Selection: Selection,
+                          Split: Split,
+                          OnSelectRegion: SelectRegion,
                           SourceID: SourceID,
                           OnRendered: { RenderTime = $0 },
-                          OnDropped: UseDroppedImage)
+                          OnDropped: LoadImages)
                     .frame(minHeight: 200)
                     // Selecting Video starts the camera; selecting anything else cancels this task, which stops it.
                     .task(id: InputSource)
@@ -139,12 +145,15 @@ struct MainUI: View
                         }
                     }
                     #endif
+                SplitControls(Setup: Split, OnChoose: ChooseSplit, OnRemove: RemoveRegions)
+                    .padding([.horizontal, .top])
                 InputControlBar(InputSource: $InputSource,
                                 MaxFPS: $MaxFPS,
                                 ShowExporter: $ShowExporter,
                                 ExportDocument: ExportDocument,
-                                OnLoad: ImportLoadedImage,
-                                CanReset: SourceName != "Built-in" || InputSource != .Image,
+                                OnLoad: LoadImages,
+                                BatchCount: Batch.IsActive ? Batch.Items.count : 0,
+                                CanReset: SourceName != "Built-in" || InputSource != .Image || Batch.IsActive,
                                 OnReset: ResetToBuiltInImage,
                                 OnTakePhoto: { ShowCamera = true },
                                 OnSave: PrepareExport,
@@ -159,30 +168,37 @@ struct MainUI: View
                 #if os(macOS)
                 PipelineControls(HasFilter: Selection != nil,
                                  OnSet: AddToPipeline,
-                                 OnConditional: AddConditionalToPipeline)
+                                 OnConditional: AddConditionalToPipeline,
+                                 OnSplit: AddSplitterToPipeline)
                     .padding([.horizontal, .bottom])
                 #endif
             }
             PanelDivider(Size: IsCompact ? $PanelHeight : $PanelWidth, Direction: IsCompact ? .vertical : .horizontal,
                          MinSize: 200, MaxSize: IsCompact ? 520 : 600)
-            ControlStack(FilterTreeData: FilterTreeData, Selection: $Selection, SourceName: DisplayedSourceName,
-                         FilterName: Selection?.DisplayName ?? "None", RenderTime: RenderTime,
-                         ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage)
-                .frame(width: IsCompact ? nil : PanelWidth, height: IsCompact ? PanelHeight : nil)
-        }
-        // The settings button is in the upper right corner of the window.
-        .overlay(alignment: .topTrailing)
-        {
-            Button("Settings", systemImage: "gearshape")
+            // The settings button has its own row above the filter list, so it never covers the list.
+            VStack(spacing: 0)
             {
-                ShowSettings = true
+                HStack
+                {
+                    Spacer()
+                    Button("Settings", systemImage: "gearshape")
+                    {
+                        ShowSettings = true
+                    }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    .controlSize(.large)
+                    .keyboardShortcut(",", modifiers: .command)
+                    .help("Settings")
+                }
+                .padding([.horizontal, .top], 8)
+                ControlStack(FilterTreeData: FilterTreeData, Selection: $Selection, SourceName: DisplayedSourceName,
+                             FilterName: Selection?.DisplayName ?? "None", RenderTime: RenderTime,
+                             ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage)
             }
-            .labelStyle(.iconOnly)
-            .buttonStyle(.borderless)
-            .controlSize(.large)
-            .keyboardShortcut(",", modifiers: .command)
-            .help("Settings")
-            .padding(8)
+            .frame(width: IsCompact ? nil : PanelWidth, height: IsCompact ? PanelHeight : nil)
+            // Whatever a panel's contents ask for, they stay inside the panel and do not push into the image.
+            .clipped()
         }
         .sheet(isPresented: $ShowSettings)
         {
@@ -197,6 +213,13 @@ struct MainUI: View
         .onChange(of: Selection)
         {
             Pipeline.SelectedFilter = Selection
+            // While the image is divided, the filter chosen belongs to the region being edited.
+            if var Current = Split,
+               Current.ActiveSelection != Selection
+            {
+                Current.Assign(Selection)
+                Split = Current
+            }
         }
         // The pipeline starts from the image on show: when its window opens, and whenever that image changes.
         .onChange(of: Pipeline.IsOpen)
@@ -209,7 +232,14 @@ struct MainUI: View
         }
         .onChange(of: InputSource)
         {
+            // A batch is only in use while the input is still images.
+            Batch.Suspended = InputSource != .Image
             SyncPipeline()
+        }
+        // Clicking an image of the batch makes it the current image, which is also where the pipeline starts.
+        .onChange(of: Batch.FocusedID)
+        {
+            UseFocusedBatchImage()
         }
     }
 }
@@ -219,4 +249,5 @@ struct MainUI: View
     @Previewable @State var Filters: FilterServer? = FilterServer()
     MainUI(Filters: $Filters)
         .environment(PipelineModel())
+        .environment(BatchModel())
 }

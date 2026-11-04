@@ -44,7 +44,7 @@ extension PipelineModel
     /// The stages that take an image from this one.
     func Consumers(of ID: Int) -> [Stage]
     {
-        Stages.filter{$0.Input == ID || $0.Second == ID}
+        Stages.filter{$0.Input == ID || $0.Second == ID || $0.Regions.contains(ID)}
     }
 
     /// The stages in an order where every stage comes after the ones it takes images from.
@@ -68,6 +68,10 @@ extension PipelineModel
             {
                 Visit(Second)
             }
+            for Region in Found.Regions
+            {
+                Visit(Region)
+            }
             Order.append(ID)
         }
         for Found in Stages.sorted(by: { $0.id < $1.id })
@@ -89,7 +93,7 @@ extension PipelineModel
             {
                 continue
             }
-            Pending.append(contentsOf: [Current.Input, Current.Second].compactMap{$0})
+            Pending.append(contentsOf: [Current.Input, Current.Second].compactMap{$0} + Current.Regions)
         }
         return Found
     }
@@ -110,6 +114,11 @@ extension PipelineModel
                     Changed = true
                 }
                 else if let Second = Current.Second, Found.contains(Second)
+                {
+                    Found.insert(Current.id)
+                    Changed = true
+                }
+                else if Current.Regions.contains(where: {Found.contains($0)})
                 {
                     Found.insert(Current.id)
                     Changed = true
@@ -172,6 +181,14 @@ extension PipelineModel
                     {
                         Col = max(Col, Other.Col + 1)
                     }
+                    // A join goes to the right of the end of every region's line.
+                    for Region in Current.Regions
+                    {
+                        if let Other = Placed[Region]
+                        {
+                            Col = max(Col, Other.Col + 1)
+                        }
+                    }
                     Point = GridPoint(Col: Col, Row: From.Row)
                 }
             }
@@ -205,7 +222,7 @@ extension PipelineModel
         var Result = [Edge]()
         for Current in Stages
         {
-            for Source in [Current.Input, Current.Second].compactMap({$0})
+            for Source in [Current.Input, Current.Second].compactMap({$0}) + Current.Regions
             {
                 Result.append(Edge(From: EffectiveSource(of: Source), To: Current.id))
             }

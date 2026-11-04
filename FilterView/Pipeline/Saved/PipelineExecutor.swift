@@ -97,6 +97,18 @@ enum PipelineExecutor
                                 Made = Merged
                             }
                         }
+
+                    case .Split:
+                        // The regions' lines start from this image; the split itself changes nothing.
+                        break
+
+                    case .Join:
+                        if let Layout = SplitLayouts(rawValue: Current.Layout ?? ""),
+                           let Combined = await SplitCompositor.ComposeAsync(Background: Incoming, Layout: Layout,
+                                                                             Regions: (Current.Regions ?? []).map{Outputs[$0]})
+                        {
+                            Made = Combined
+                        }
                 }
             }
             Outputs[ID] = Made
@@ -124,6 +136,10 @@ enum PipelineExecutor
             if let Second = Found.Second
             {
                 Visit(Second)
+            }
+            for Region in Found.Regions ?? []
+            {
+                Visit(Region)
             }
             Result.append(ID)
         }

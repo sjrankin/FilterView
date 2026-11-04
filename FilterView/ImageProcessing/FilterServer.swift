@@ -41,6 +41,7 @@ class FilterServer
         Register(CIDither.FilterName, CIDither())
         Register(AtkinsonDither.FilterName, AtkinsonDither())
         Register(AtkinsonDitherFast.FilterName, AtkinsonDitherFast())
+        Register(ASCIIArt.FilterName, ASCIIArt())
         Register(CIMaxComponent.FilterName, CIMaxComponent())
         Register(CIMinComponent.FilterName, CIMinComponent())
         Register(CICMYKHalftone.FilterName, CICMYKHalftone())

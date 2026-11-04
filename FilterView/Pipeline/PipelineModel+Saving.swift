@@ -37,7 +37,7 @@ extension PipelineModel
 
     private func SavedStageFor(_ Current: Stage) -> SavedStage
     {
-        var Made = SavedStage(ID: Current.id, Kind: Current.Kind == .Merge ? .Merge : .Filter, Input: Current.Input ?? 0,
+        var Made = SavedStage(ID: Current.id, Kind: SavedKind(Current.Kind), Input: Current.Input ?? 0,
                               Second: Current.Second, Under: Current.Under, Skipped: Current.Skipped)
         switch Current.Kind
         {
@@ -65,15 +65,59 @@ extension PipelineModel
                 Made.MergeMode = Current.MergeMode.rawValue
                 Made.MergeAmount = Current.MergeAmount
 
+            case .Split:
+                Made.Layout = Current.Layout?.rawValue
+
+            case .Join:
+                Made.Layout = Current.Layout?.rawValue
+                Made.Regions = Current.Regions
+
             case .Original:
                 break
         }
         return Made
     }
 
+    private func SavedKind(_ Kind: Kinds) -> SavedStage.Kinds
+    {
+        switch Kind
+        {
+            case .Merge:
+                return .Merge
+
+            case .Split:
+                return .Split
+
+            case .Join:
+                return .Join
+
+            case .Filter, .Original:
+                return .Filter
+        }
+    }
+
+    private func StageKind(_ Kind: SavedStage.Kinds) -> Kinds
+    {
+        switch Kind
+        {
+            case .Filter:
+                return .Filter
+
+            case .Merge:
+                return .Merge
+
+            case .Split:
+                return .Split
+
+            case .Join:
+                return .Join
+        }
+    }
+
     private func StageFor(Saved: SavedStage) -> Stage
     {
-        var Made = Stage(id: Saved.ID, Kind: Saved.Kind == .Merge ? .Merge : .Filter, Input: Saved.Input, Second: Saved.Second,
+        var Made = Stage(id: Saved.ID, Kind: StageKind(Saved.Kind), Input: Saved.Input, Second: Saved.Second,
+                         Layout: SplitLayouts(rawValue: Saved.Layout ?? ""), Regions: Saved.Regions ?? [],
                          Under: Saved.Under, MergeMode: MergeModes(rawValue: Saved.MergeMode ?? "") ?? .Multiply,
                          MergeAmount: Saved.MergeAmount ?? 1.0, Skipped: Saved.Skipped)
         if let Nested = Saved.Nested,

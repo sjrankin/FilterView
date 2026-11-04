@@ -66,5 +66,6 @@ struct ContentView: View
 {
     ContentView()
         .environment(PipelineModel())
+        .environment(BatchModel())
 }
 

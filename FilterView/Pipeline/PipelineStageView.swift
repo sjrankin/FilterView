@@ -53,6 +53,17 @@ struct StageView: View
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .background(Checkerboard(SquareSize: 8))
+                        .overlay
+                        {
+                            // The dividing lines, on the stages that divide the image or put it together.
+                            if (Stage.Kind == .Split || Stage.Kind == .Join),
+                               let Layout = Stage.Layout
+                            {
+                                SplitLines(Layout: Layout)
+                                    .stroke(.white, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                                    .shadow(color: .black, radius: 1)
+                            }
+                        }
                 }
                 else
                 {
@@ -118,6 +129,12 @@ struct StageView: View
                     .bold(IsFinal)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
+                if let Region = Pipeline.RegionLabel(for: Stage.id)
+                {
+                    Text("Region: \(Region)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if Stage.Skipped
                 {
                     Text("Skipped")
@@ -166,13 +183,25 @@ struct StageView: View
                     Pipeline.Skip(Stage.id)
                 }
             }
-            Button("Delete", role: .destructive)
+            if Pipeline.IsPartOfSplitter(Stage.id)
             {
-                Pipeline.Delete(Stage.id)
+                // The parts of a splitter go together.
+                Button("Remove Partial Splitter", role: .destructive)
+                {
+                    Pipeline.RemoveSplitter(Stage.id)
+                }
+            }
+            else
+            {
+                Button("Delete", role: .destructive)
+                {
+                    Pipeline.Delete(Stage.id)
+                }
             }
             Divider()
         }
-        if Stage.Kind != .Original
+        if Stage.Kind != .Original,
+           Stage.Kind != .Join
         {
             Button("Insert Filter Before…")
             {
@@ -183,11 +212,13 @@ struct StageView: View
         {
             OnInsert(true)
         }
+        .disabled(Stage.Kind == .Split)
         Divider()
         Button("Diverge")
         {
             Pipeline.Diverge(Stage.id)
         }
+        .disabled(Stage.Kind == .Split)
         Button("Merge With…")
         {
             OnMerge()
@@ -208,6 +239,28 @@ struct StageView: View
             }
             .disabled(Pipeline.SelectedFilter == nil)
         }
+    }
+}
+
+/// The lines that divide a picture into a layout's regions.
+private struct SplitLines: Shape
+{
+    let Layout: SplitLayouts
+
+    func path(in Rect: CGRect) -> Path
+    {
+        var Result = Path()
+        if Layout.ColumnCount == 2
+        {
+            Result.move(to: CGPoint(x: Rect.midX, y: Rect.minY))
+            Result.addLine(to: CGPoint(x: Rect.midX, y: Rect.maxY))
+        }
+        if Layout.RowCount == 2
+        {
+            Result.move(to: CGPoint(x: Rect.minX, y: Rect.midY))
+            Result.addLine(to: CGPoint(x: Rect.maxX, y: Rect.midY))
+        }
+        return Result
     }
 }
 #endif

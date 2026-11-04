@@ -31,6 +31,7 @@ struct PipelineWindow: View
     static let ID = "pipeline"
 
     @Environment(PipelineModel.self) private var Pipeline
+    @Environment(BatchModel.self) private var Batch
     @Environment(\.dismissWindow) private var DismissWindow
     @State private var ShowExporter = false
     @State private var ExportDocument = ImageUtility.PNGImage(Data: Data())
@@ -96,16 +97,21 @@ struct PipelineWindow: View
                 }
                 .disabled(Pipeline.Stages.count < 2)
                 .help("Save the filters and all of their options, to use again or to use inside another pipeline.")
-                Button("Export Image")
+                Button(Batch.IsActive ? "Save All Images" : "Export Image")
                 {
-                    if let Final = Pipeline.FinalImage,
+                    if Batch.IsActive
+                    {
+                        SaveBatch()
+                    }
+                    else if let Final = Pipeline.FinalImage,
                        let Encoded = ImageUtility.ImageEncoder.PNGData(Final)
                     {
                         ExportDocument = ImageUtility.PNGImage(Data: Encoded)
                         ShowExporter = true
                     }
                 }
-                .disabled(Pipeline.FinalImage == nil)
+                .disabled(Batch.IsActive ? Batch.IsSaving : Pipeline.FinalImage == nil)
+                .help(Batch.IsActive ? "Run every image of the batch through this pipeline and save each one beside its original" : "")
                 .fileExporter(isPresented: $ShowExporter,
                               document: ExportDocument,
                               contentType: .png,
@@ -121,7 +127,8 @@ struct PipelineWindow: View
                 {
                     Pipeline.SendBack()
                 }
-                .disabled(Pipeline.FinalImage == nil)
+                // The batch images are saved from their files, so the pipeline's result cannot replace one.
+                .disabled(Pipeline.FinalImage == nil || Batch.IsActive)
                 Button("Clear Pipeline", role: .destructive)
                 {
                     ConfirmClear = true
@@ -143,6 +150,7 @@ struct PipelineWindow: View
             .padding()
         }
         .frame(minWidth: 420, minHeight: 360)
+        .modifier(BatchSaveDialogs(Origin: .Pipeline))
         .confirmationDialog("Clear the pipeline?", isPresented: $ConfirmClear)
         {
             Button("Clear Pipeline", role: .destructive)
@@ -186,6 +194,21 @@ struct PipelineWindow: View
             // A closed pipeline is thrown away; the next one starts with the original image only.
             Pipeline.IsOpen = false
             Pipeline.Reset()
+        }
+    }
+
+    /// Runs every image of the batch through the pipeline as it is now, and saves each one beside its original.
+    private func SaveBatch()
+    {
+        let Saved = Pipeline.Snapshot(Name: "Batch")
+        let Filters = Pipeline.Server?.BuiltInFilters ?? [:]
+        Task
+        {
+            await Batch.SaveAll(From: .Pipeline)
+            {
+                Image in
+                try await PipelineExecutor.Run(Saved, Input: Image, Filters: Filters)
+            }
         }
     }
 }

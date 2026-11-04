@@ -235,6 +235,30 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "Name": "Text",
+                    "Children": [
+                        {
+                            "Name": "ASCII Art",
+                            "Filter": "ASCII Art",
+                            "Parameters": [
+                                { "Key": "FONT", "Title": "Mono-spaced Font", "Type": "Text", "Default": "Menlo-Regular" },
+                                { "Key": "FONTSIZE", "Title": "Font Size", "Type": "Slider", "Min": 3, "Max": 72, "Step": 1, "Default": "8" },
+                                {
+                                    "Key": "CHARSET", "Title": "Characters", "Type": "Choice", "Default": "ASCII",
+                                    "Choices": [
+                                        { "Title": "ASCII", "Value": "ASCII" },
+                                        { "Title": "Extended (Latin-1 and blocks)", "Value": "EXTENDED" }
+                                    ]
+                                },
+                                { "Key": "DENSITY", "Title": "Density", "Type": "Slider", "Min": 0.2, "Max": 3, "Step": 0.05, "Default": "1" },
+                                { "Key": "INVERT", "Title": "Invert", "Type": "Toggle", "Default": "false" },
+                                { "Key": "BACKGROUND", "Title": "Background Color", "Type": "Color", "Default": "FFFFFFFF" },
+                                { "Key": "TEXTCOLOR", "Title": "Text Color", "Type": "Color", "Default": "000000FF" }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
