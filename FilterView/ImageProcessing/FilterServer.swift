@@ -77,6 +77,7 @@ class FilterServer
         Register(BackgroundClear.FilterName, BackgroundClear())
         Register(AlphaShape.FilterName, AlphaShape())
         Register(ColorRegion.FilterName, ColorRegion())
+        Register(Stipple.FilterName, Stipple())
         Register(CIGaussianBlur.FilterName, CIGaussianBlur())
         Register(CIMedian.FilterName, CIMedian())
         Register(CIMorphologyGradient.FilterName, CIMorphologyGradient())

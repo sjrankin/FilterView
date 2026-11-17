@@ -161,6 +161,19 @@
                     "Name": "Stylize",
                     "Children": [
                         {
+                            "Name": "Stipple", "Filter": "Stipple",
+                            "Parameters": [
+                                { "Key": "BANDS", "Title": "Brightness Regions (0 = smooth)", "Type": "Slider", "Min": 0, "Max": 16, "Step": 1, "Default": "0" },
+                                { "Key": "DENSITY", "Title": "Brightest Dots", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "1" },
+                                { "Key": "CURVE", "Title": "Tone Curve", "Type": "Slider", "Min": 0.2, "Max": 5, "Step": 0.1, "Default": "2" },
+                                { "Key": "TEXTURE", "Title": "Streak Texture", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.5" },
+                                { "Key": "DOTSIZE", "Title": "Dot Size", "Type": "Slider", "Min": 1, "Max": 16, "Step": 1, "Default": "1" },
+                                { "Key": "SEED", "Title": "Random Seed", "Type": "Slider", "Min": 0, "Max": 999, "Step": 1, "Default": "0" },
+                                { "Key": "BASE", "Title": "Base Color", "Type": "Color", "Default": "000000FF" },
+                                { "Key": "DOT", "Title": "Dot Color", "Type": "Color", "Default": "FFFFFFFF" }
+                            ]
+                        },
+                        {
                             "Name": "Kuwahara", "Filter": "Metal Kuwahara",
                             "Parameters": [
                                 {
