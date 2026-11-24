@@ -46,6 +46,8 @@ enum ImageFilterTypes
     case CPU
     /// Filters implemented using the OpenCV library.
     case OpenCV
+    /// Filters that run another filter on only some parts of an image, chosen by a condition.
+    case Conditional
 }
 
 /// A filter that makes its picture from nothing and uses only the size of the image it is given, such as the sunbeams. Meant to be

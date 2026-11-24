@@ -78,6 +78,7 @@ class FilterServer
         Register(AlphaShape.FilterName, AlphaShape())
         Register(ColorRegion.FilterName, ColorRegion())
         Register(Stipple.FilterName, Stipple())
+        Register(KMeansColor.FilterName, KMeansColor())
         Register(CIGaussianBlur.FilterName, CIGaussianBlur())
         Register(CIMedian.FilterName, CIMedian())
         Register(CIMorphologyGradient.FilterName, CIMorphologyGradient())
@@ -145,6 +146,9 @@ class FilterServer
         Register(OpenCVMorphology.FilterName, OpenCVMorphology())
         Register(OpenCVBayerDemosaic.FilterName, OpenCVBayerDemosaic())
         #endif
+        let Regional = RegionalConditional()
+        Regional.Server = self
+        Register(RegionalConditional.FilterName, Regional)
         let SavedPipelines = SavedPipelineFilter()
         SavedPipelines.Server = self
         Register(SavedPipelineFilter.FilterName, SavedPipelines)
@@ -171,7 +175,7 @@ class FilterServer
     }
     
     /// Returns a list of image filter names.
-    /// - Parameter InOrder: If true, the filter names are in the order `Infrastructure`, `Metal`, and `CoreImage`,
+    /// - Parameter InOrder: If true, the filter names are in the order `Infrastructure`, `Metal`, `CoreImage`, `CPU`, and `Conditional`,
     /// and internally in each group, in the order defined in `init`. Otherwise, the image filter names are returned in an
     /// arbitrary order since they are stored in a dictionary.
     /// - Returns: Array of filter names.
@@ -183,7 +187,8 @@ class FilterServer
             let Metal = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Metal}
             let CoreImage = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .CoreImage}
             let CPU = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .CPU}
-            return Infrastructure + Metal + CoreImage + CPU
+            let Conditional = FilterOrder.filter{BuiltInFilters[$0]?.FilterType == .Conditional}
+            return Infrastructure + Metal + CoreImage + CPU + Conditional
         }
         else
         {

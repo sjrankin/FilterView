@@ -235,8 +235,91 @@
             ]
         },
         {
+            "Name": "Conditional",
+            "Children": [
+                {
+                    "Name": "Regional Conditional",
+                    "Filter": "Regional Conditional",
+                    "Parameters": [
+                        {
+                            "Key": "FILTER", "Title": "Filter To Apply", "Type": "Choice", "Default": "Metal Invert",
+                            "Choices": [
+                                        { "Title": "Invert", "Value": "Metal Invert" },
+                                        { "Title": "Grayscale", "Value": "CI Grayscale" },
+                                        { "Title": "Noir", "Value": "CI Noir" },
+                                        { "Title": "Pixellate", "Value": "CI Pixellate" },
+                                        { "Title": "Gaussian Blur", "Value": "CI Gaussian Blur" },
+                                        { "Title": "Posterize", "Value": "CI Color Posterize" },
+                                        { "Title": "Kuwahara", "Value": "Metal Kuwahara" },
+                                        { "Title": "Stipple", "Value": "Stipple" },
+                                        { "Title": "Sobel", "Value": "MPS Sobel" },
+                                        { "Title": "Brightness Invert", "Value": "Metal Bright Invert" },
+                                        { "Title": "Line Screen", "Value": "CI LineScreen" }
+                            ]
+                        },
+                        {
+                            "Key": "ATTRIBUTE", "Title": "Make Regions By", "Type": "Choice", "Default": "BRIGHTNESS",
+                            "Choices": [
+                                { "Title": "Brightness", "Value": "BRIGHTNESS" },
+                                { "Title": "Hue", "Value": "HUE" },
+                                { "Title": "Saturation", "Value": "SATURATION" },
+                                { "Title": "Red", "Value": "RED" },
+                                { "Title": "Green", "Value": "GREEN" },
+                                { "Title": "Blue", "Value": "BLUE" }
+                            ]
+                        },
+                        { "Key": "BANDS", "Title": "Region Detail", "Type": "Slider", "Min": 2, "Max": 16, "Step": 1, "Default": "8" },
+                        {
+                            "Key": "COMPARE", "Title": "Apply When Region Is", "Type": "Segments", "Default": "GREATER",
+                            "Choices": [
+                                { "Title": "Greater Than", "Value": "GREATER" },
+                                { "Title": "Less Than", "Value": "LESS" }
+                            ]
+                        },
+                        { "Key": "VALUE", "Title": "Value", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.5" },
+                        { "Key": "REMOVE", "Title": "Remove Other Pixels", "Type": "Toggle", "Default": "false" }
+                    ]
+                }
+            ]
+        },
+        {
             "Name": "CPU",
             "Children": [
+                {
+                    "Name": "Clustering",
+                    "Children": [
+                        {
+                            "Name": "K-Means",
+                            "Filter": "K-Means",
+                            "Parameters": [
+                                {
+                                    "Key": "FEATURES", "Title": "Cluster By", "Type": "Choice", "Default": "RGB",
+                                    "Choices": [
+                                        { "Title": "RGB", "Value": "RGB" },
+                                        { "Title": "Lab", "Value": "LAB" },
+                                        { "Title": "Hue, Saturation, Brightness", "Value": "HSB" },
+                                        { "Title": "Brightness", "Value": "BRIGHTNESS" },
+                                        { "Title": "Hue", "Value": "HUE" },
+                                        { "Title": "Saturation", "Value": "SATURATION" },
+                                        { "Title": "Red", "Value": "RED" },
+                                        { "Title": "Green", "Value": "GREEN" },
+                                        { "Title": "Blue", "Value": "BLUE" }
+                                    ]
+                                },
+                                { "Key": "K", "Title": "Clusters", "Type": "Slider", "Min": 2, "Max": 16, "Step": 1, "Default": "5" },
+                                { "Key": "ITERATIONS", "Title": "Iterations", "Type": "Slider", "Min": 1, "Max": 50, "Step": 1, "Default": "10" },
+                                { "Key": "SEED", "Title": "Random Seed", "Type": "Slider", "Min": 0, "Max": 999, "Step": 1, "Default": "0" },
+                                {
+                                    "Key": "OUTPUT", "Title": "Show", "Type": "Segments", "Default": "CENTER",
+                                    "Choices": [
+                                        { "Title": "Average Color", "Value": "CENTER" },
+                                        { "Title": "Gray Level", "Value": "GRAY" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
                 {
                     "Name": "Monochrome",
                     "Children": [
