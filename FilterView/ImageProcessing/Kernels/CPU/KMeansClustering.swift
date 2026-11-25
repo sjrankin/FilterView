@@ -43,6 +43,23 @@ enum KMeansFeatures: String, CaseIterable, Sendable
     /// The blue channel only.
     case Blue = "BLUE"
 
+    /// The number the GPU kernel uses for this space (see `KMeansPaint.metal`).
+    var KernelCode: Int
+    {
+        switch self
+        {
+            case .RGB: return 0
+            case .Lab: return 1
+            case .HSB: return 2
+            case .Brightness: return 3
+            case .Hue: return 4
+            case .Saturation: return 5
+            case .Red: return 6
+            case .Green: return 7
+            case .Blue: return 8
+        }
+    }
+
     /// How many numbers describe a pixel in this space.
     var Dimensions: Int
     {

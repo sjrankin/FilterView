@@ -164,6 +164,6 @@ struct KMeansTests
         let Server = FilterServer()
         #expect(FilterTreeLoader.MissingFilters(in: Root, Server: Server).isEmpty)
         #expect(Root.Leaves().contains{$0.Filter == KMeansColor.FilterName})
-        #expect(Server.GetFilter(KMeansColor.FilterName)?.FilterType == .CPU)
+        #expect(Server.GetFilter(KMeansColor.FilterName)?.FilterType == .Metal)
     }
 }
