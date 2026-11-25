@@ -33,6 +33,11 @@ struct OptionView: View
     var ImageSize: CGSize? = nil
     /// The original, unfiltered image, shown as a thumbnail. `nil` shows a placeholder.
     var SourceImage: Image? = nil
+    /// The color histogram of the original image, shown under its thumbnail. `nil` shows nothing.
+    var SourceHistogram: ColorHistogram? = nil
+
+    /// Whether the original image's histogram is open. Remembered between launches.
+    @AppStorage("OriginalHistogramExpanded") private var ShowOriginalHistogram = true
 
     /// The image size as "width × height px", or a dash if it is not known.
     private var ImageSizeText: String
@@ -100,6 +105,14 @@ struct OptionView: View
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: 100, maxHeight: 100)
                     .background(.black)
+            }
+            if let SourceHistogram
+            {
+                // Open or closed as the user left it, remembered between launches.
+                DisclosureGroup("Histogram", isExpanded: $ShowOriginalHistogram)
+                {
+                    HistogramView(Histogram: SourceHistogram, Height: 120)
+                }
             }
             Divider()
             FilterOptionsView(Selection: $Selection)

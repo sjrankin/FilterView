@@ -32,6 +32,9 @@ final class PipelineLibrary
     /// The `UserDefaults` key of the bookmarks of the other folders.
     static let BookmarksKey = "PipelineLibrary.Folders"
 
+    /// The identity of the last item of the Saved Pipelines branch, the one that loads a folder of pipelines. It is not a pipeline.
+    static let LoadNodeID = UUID()
+
     /// Where pipelines are saved unless the user chooses another folder.
     nonisolated static var StandardDirectory: URL
     {
@@ -329,6 +332,9 @@ final class PipelineLibrary
             Children.append(FilterNode(NodeID: Folder.id, Name: Folder.URL.lastPathComponent, Filter: nil, Options: nil,
                                        Parameters: nil, Children: Folder.Entries.map(Node)))
         }
+        // The item that loads more pipelines is always the last one.
+        Children.append(FilterNode(NodeID: PipelineLibrary.LoadNodeID, Name: "Load Pipelines…", Filter: nil, Options: nil,
+                                   Parameters: nil, Children: nil))
         return FilterNode(NodeID: BranchID, Name: "Saved Pipelines", Filter: nil, Options: nil, Parameters: nil, Children: Children)
     }
 

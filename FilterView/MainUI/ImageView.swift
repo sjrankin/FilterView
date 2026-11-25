@@ -36,6 +36,10 @@ struct ImageView: View
     /// Called with how long the filter took to produce the image (from the call to the finished image), or `nil` if there is no
     /// filter or it failed.
     var OnRendered: ((Duration?) -> Void)? = nil
+    /// Called with the color histogram of the image shown, each time that image changes.
+    var OnHistogram: ((ColorHistogram?) -> Void)? = nil
+    /// Counts up each time the filtered image changes, so the histogram is made again.
+    @State private var Version = 0
     @State private var FilteredImage: Image?
     /// The `SourceID` that `FilteredImage` was made from. A result for an older image is never shown.
     @State private var FilteredFor: UUID?
@@ -63,6 +67,24 @@ struct ImageView: View
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black, ignoresSafeAreaEdges: [])
+        .task(id: ShownKey(Version: Version, SourceID: SourceID, Filtered: FilteredFor == SourceID))
+        {
+            guard let OnHistogram else
+            {
+                return
+            }
+            let Shown = (FilteredFor == SourceID ? FilteredImage : nil) ?? DisplayImage
+            guard let Source = ImageUtility.ImageToCGImage(Shown) else
+            {
+                OnHistogram(nil)
+                return
+            }
+            let Counted = await Task.detached(priority: .utility) { ColorHistogram(Image: Source) }.value
+            if !Task.isCancelled
+            {
+                OnHistogram(Counted)
+            }
+        }
         .task(id: TaskKey(Selection: Selection, Split: Split, SourceID: SourceID))
         {
             let Current = SourceID
@@ -74,6 +96,7 @@ struct ImageView: View
             guard let Selection = Selection else
             {
                 FilteredImage = nil
+                Version += 1
                 OnRendered?(nil)
                 return
             }
@@ -87,6 +110,7 @@ struct ImageView: View
                 {
                     FilteredImage = Result
                     FilteredFor = Current
+                    Version += 1
                     let Elapsed = ContinuousClock.now - StartTime
                     OnRendered?(Elapsed)
                     #if DEBUG
@@ -129,6 +153,7 @@ extension ImageView
             {
                 FilteredImage = ImageUtility.CGImageToImage(Result)
                 FilteredFor = Current
+                Version += 1
                 OnRendered?(ContinuousClock.now - StartTime)
             }
         }
@@ -141,6 +166,14 @@ extension ImageView
             #endif
         }
     }
+}
+
+/// Identifies the image the histogram is made from.
+private struct ShownKey: Hashable
+{
+    let Version: Int
+    let SourceID: UUID
+    let Filtered: Bool
 }
 
 /// Identifies one filtering job: re-run when either the filter or the source image changes.

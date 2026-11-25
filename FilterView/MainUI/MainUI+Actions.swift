@@ -307,6 +307,25 @@ extension MainUI
         ShowExporter = true
     }
 
+    /// Counts the colors of the source image for the histogram beside its thumbnail.
+    func UpdateSourceHistogram() async
+    {
+        guard InputSource == .Image else
+        {
+            return
+        }
+        guard let Source = ImageUtility.ImageToCGImage(SourceImage) else
+        {
+            SourceHistogram = nil
+            return
+        }
+        let Counted = await Task.detached(priority: .utility) { ColorHistogram(Image: Source) }.value
+        if !Task.isCancelled
+        {
+            SourceHistogram = Counted
+        }
+    }
+
     /// Runs the camera while the input is Video, filtering each frame with the current selection.
     /// Called from a `task(id:)` on the input source: selecting anything but Video cancels it, which ends the stream and
     /// stops the camera.
@@ -349,6 +368,22 @@ extension MainUI
                 }
                 LiveImage = ImageUtility.CGImageToImage(Result)
                 LiveSource = ImageUtility.CGImageToImage(Frame)
+                // The histograms follow the video, but a frame that comes while the last is still being counted is skipped.
+                if !SourceHistogramBusy
+                {
+                    SourceHistogramBusy = true
+                    let Processed = Result
+                    Task
+                    {
+                        let Counted = await Task.detached(priority: .utility)
+                        {
+                            (ColorHistogram(Image: Frame), ColorHistogram(Image: Processed))
+                        }.value
+                        SourceHistogram = Counted.0
+                        Histogram = Counted.1
+                        SourceHistogramBusy = false
+                    }
+                }
                 // Per frame: filtering plus converting the result for display.
                 RenderTime = Transform == nil ? nil : ContinuousClock.now - StartTime
                 if IsRecording

@@ -44,6 +44,7 @@ struct SavedPipelineMenu: View
                 Task
                 {
                     await Pipeline.Load(Entry.Pipeline, From: Entry.URL)
+                    Pipeline.MarkBaseline()
                 }
             }
             .help("Replaces the pipeline in the Pipeline window with this one.")

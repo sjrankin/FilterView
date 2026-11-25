@@ -23,7 +23,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Shows the filter tree. Groups expand and collapse; tapping a filter sets `Selection` to its filter name and options. The last
-/// branch, Saved Pipelines, holds the pipelines saved in the default folder and in any folders loaded with the button under the tree.
+/// branch, Saved Pipelines, holds the pipelines saved in the default folder and in any folders loaded with its last item, Load Pipelines.
 /// A saved pipeline is chosen like a filter.
 struct FilterTreeView: View
 {
@@ -47,23 +47,25 @@ struct FilterTreeView: View
                 List(Branches, children: \.Children, selection: $SelectedNode)
                 {
                     Node in
-                    Text(Node.Name)
-                        .contextMenu
-                        {
-                            SavedPipelineMenu(NodeID: Node.id)
-                        }
-                }
-                Divider()
-                HStack
-                {
-                    Button("Load Pipelines…", systemImage: "folder.badge.plus")
+                    if Node.id == PipelineLibrary.LoadNodeID
                     {
-                        ChoosingFolder = true
+                        // The last item of the Saved Pipelines branch. It is a button, not a filter or pipeline.
+                        Button("Load Pipelines…", systemImage: "folder.badge.plus")
+                        {
+                            ChoosingFolder = true
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Add a folder of saved pipelines to the Saved Pipelines branch. The folder is remembered.")
                     }
-                    .help("Add a folder of saved pipelines to the Saved Pipelines branch. The folder is remembered.")
-                    Spacer()
+                    else
+                    {
+                        Text(Node.Name)
+                            .contextMenu
+                            {
+                                SavedPipelineMenu(NodeID: Node.id)
+                            }
+                    }
                 }
-                .padding(.vertical)
             }
             .fileImporter(isPresented: $ChoosingFolder, allowedContentTypes: [.folder])
             {

@@ -53,6 +53,10 @@ final class RegionalConditional: ImageFilter
     ///   - "VALUE": The value to compare with, 0.0 to 1.0. Default is 0.5.
     ///   - "REMOVE": `true` makes every pixel that does not pass the test transparent, leaving only the second filter's result. Default is
     ///   `false`.
+    ///   - "CLEARWHITE": `true` makes the white in the second filter's result fully transparent, so only its non-white parts are left.
+    ///   White in the parts of the image that the second filter did not run on is not touched. Default is `false`.
+    ///   - "WHITETOLERANCE": How close to white counts as white, 0.0 to 1.0. 0 is pure white only; 0.1 also takes pixels whose red, green, and
+    ///   blue are all at least 0.9. Default is 0.1.
     ///   - Keys that start with `InnerPrefix`: options for the second filter, with the prefix removed.
     /// - Returns: Processed image, the same size.
     /// - Throws: `FilterException` if the second filter is not named, is this filter, or cannot be found, or if the image cannot be read.
@@ -74,6 +78,8 @@ final class RegionalConditional: ImageFilter
         let Greater = FilterOptionValues.Text(Options, "COMPARE", Default: "GREATER") != "LESS"
         let Threshold = Float(min(max(FilterOptionValues.Number(Options, "VALUE", Default: 0.5), 0), 1))
         let Remove = FilterOptionValues.Flag(Options, "REMOVE")
+        let ClearWhite: Float? = FilterOptionValues.Flag(Options, "CLEARWHITE")
+            ? Float(min(max(FilterOptionValues.Number(Options, "WHITETOLERANCE", Default: 0.1), 0), 1)) : nil
 
         var Inner = [String: Any]()
         for (Key, Value) in Options ?? [:] where Key.hasPrefix(RegionalConditional.InnerPrefix)
@@ -104,7 +110,8 @@ final class RegionalConditional: ImageFilter
         {
             Filtered = Original
         }
-        let Combined = RegionalConditional.Combine(Original: Original, Filtered: Filtered, Regions: Regions, Passes: Passes, Remove: Remove)
+        let Combined = RegionalConditional.Combine(Original: Original, Filtered: Filtered, Regions: Regions, Passes: Passes, Remove: Remove,
+                                                   ClearWhite: ClearWhite)
         guard let Output = PixelBuffer.Image(Combined, Width: Width, Height: Height) else
         {
             throw FilterException(Message: "Regional Conditional cannot make its image.")
@@ -118,7 +125,10 @@ final class RegionalConditional: ImageFilter
     /// - Parameter Regions: The regions of the input.
     /// - Parameter Passes: For each region number, whether it passed the test.
     /// - Parameter Remove: If true, pixels that did not pass are made transparent.
-    static func Combine(Original: [UInt8], Filtered: [UInt8], Regions: RegionMap, Passes: [Bool], Remove: Bool) -> [UInt8]
+    /// - Parameter ClearWhite: If set, pixels of the filtered result that are white, to within this tolerance (0.0 to 1.0), are made
+    /// transparent. `nil` leaves them alone.
+    static func Combine(Original: [UInt8], Filtered: [UInt8], Regions: RegionMap, Passes: [Bool], Remove: Bool,
+                        ClearWhite: Float? = nil) -> [UInt8]
     {
         var Result = Original
         for Index in 0 ..< Regions.Labels.count
@@ -127,6 +137,15 @@ final class RegionalConditional: ImageFilter
             let Passed = Region >= 0 && Passes[Region]
             if Passed
             {
+                if let Tolerance = ClearWhite,
+                   IsWhite(Filtered, Index, Tolerance)
+                {
+                    for Channel in 0 ..< 4
+                    {
+                        Result[Index * 4 + Channel] = 0
+                    }
+                    continue
+                }
                 for Channel in 0 ..< 4
                 {
                     Result[Index * 4 + Channel] = Filtered[Index * 4 + Channel]
@@ -141,5 +160,27 @@ final class RegionalConditional: ImageFilter
             }
         }
         return Result
+    }
+
+    /// True if a pixel is white to within a tolerance. A fully transparent pixel is not white (it is already clear).
+    /// - Parameter Pixels: 8-bit premultiplied RGBA.
+    /// - Parameter Index: The pixel's number.
+    /// - Parameter Tolerance: 0.0 to 1.0; red, green, and blue must all be at least `1 - Tolerance`.
+    private static func IsWhite(_ Pixels: [UInt8], _ Index: Int, _ Tolerance: Float) -> Bool
+    {
+        let Alpha = Float(Pixels[Index * 4 + 3]) / 255
+        guard Alpha > 0 else
+        {
+            return false
+        }
+        let Floor = 1 - Tolerance
+        for Channel in 0 ..< 3
+        {
+            if Float(Pixels[Index * 4 + Channel]) / 255 / Alpha < Floor - 0.002
+            {
+                return false
+            }
+        }
+        return true
     }
 }

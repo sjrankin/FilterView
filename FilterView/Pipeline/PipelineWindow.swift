@@ -35,11 +35,21 @@ struct PipelineWindow: View
     @Environment(\.dismissWindow) private var DismissWindow
     @State private var ShowExporter = false
     @State private var ExportDocument = ImageUtility.PNGImage(Data: Data())
+    /// The file name the save dialog starts with.
+    @State private var ExportName = "Pipeline"
     @State private var MergeAsked: MergeRequest? = nil
     @State private var EditAsked: EditRequest? = nil
     @State private var InsertAsked: InsertRequest? = nil
     @State private var ShowSavePipeline = false
     @State private var ConfirmClear = false
+    @State private var ShowText = false
+    @State private var ConfirmCancel = false
+    /// True while a save started by Cancel is being asked for, so the window closes when it is done.
+    @State private var CloseAfterSave = false
+    /// The width the user has dragged the final image view to.
+    @State private var FinalWidth: CGFloat = 280
+    /// The width of the whole window, which limits the final image view.
+    @State private var WindowWidth: CGFloat = 1000
 
     var body: some View
     {
@@ -52,6 +62,8 @@ struct PipelineWindow: View
         let Height = CGFloat(Rows) * PipelineMetrics.CellHeight + 2 * PipelineMetrics.Margin
         VStack(spacing: 0)
         {
+            HStack(spacing: 0)
+            {
             ScrollView([.horizontal, .vertical])
             {
                 ZStack(alignment: .topLeading)
@@ -80,7 +92,8 @@ struct PipelineWindow: View
                                       IsFinal: Stage.id == Tip && Stage.Kind != .Original,
                                       OnMerge: { MergeAsked = MergeRequest(id: Stage.id) },
                                       OnEdit: { EditAsked = EditRequest(id: Stage.id) },
-                                      OnInsert: { InsertAsked = InsertRequest(id: Stage.id, After: $0) })
+                                      OnInsert: { InsertAsked = InsertRequest(id: Stage.id, After: $0) },
+                                      OnSave: { SaveStageImage(Stage) })
                                 .offset(x: Frame.minX, y: Frame.minY)
                         }
                     }
@@ -88,6 +101,8 @@ struct PipelineWindow: View
                 .frame(width: Width, height: Height, alignment: .topLeading)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            PipelineFinalView(WindowWidth: WindowWidth, Width: $FinalWidth)
+            }
             Divider()
             HStack
             {
@@ -107,6 +122,7 @@ struct PipelineWindow: View
                        let Encoded = ImageUtility.ImageEncoder.PNGData(Final)
                     {
                         ExportDocument = ImageUtility.PNGImage(Data: Encoded)
+                        ExportName = "Pipeline"
                         ShowExporter = true
                     }
                 }
@@ -115,7 +131,7 @@ struct PipelineWindow: View
                 .fileExporter(isPresented: $ShowExporter,
                               document: ExportDocument,
                               contentType: .png,
-                              defaultFilename: "Pipeline")
+                              defaultFilename: ExportName)
                 {
                     Result in
                     if case .failure(let Failure) = Result
@@ -123,6 +139,11 @@ struct PipelineWindow: View
                         print("Save failed: \(Failure)")
                     }
                 }
+                Button("Edit as Text…")
+                {
+                    ShowText = true
+                }
+                .help("Show the pipeline as text, to edit it in words, or to save it as a text file or open one.")
                 Button("Use as Source")
                 {
                     Pipeline.SendBack()
@@ -142,6 +163,18 @@ struct PipelineWindow: View
                         .lineLimit(1)
                         .foregroundStyle(.secondary)
                 }
+                Button("Cancel")
+                {
+                    if Pipeline.HasUnsavedChanges
+                    {
+                        ConfirmCancel = true
+                    }
+                    else
+                    {
+                        DismissWindow(id: PipelineWindow.ID)
+                    }
+                }
+                .help("Throw away the changes made since the window opened, and close it.")
                 Button("Close")
                 {
                     DismissWindow(id: PipelineWindow.ID)
@@ -163,6 +196,34 @@ struct PipelineWindow: View
         {
             Text("Every filter, branch and merge is removed. Only the original image stays.")
         }
+        .confirmationDialog("Save changes to the pipeline?", isPresented: $ConfirmCancel)
+        {
+            Button("Save")
+            {
+                SaveThenClose()
+            }
+            Button("Don’t Save", role: .destructive)
+            {
+                Task
+                {
+                    await Pipeline.DiscardChanges()
+                    DismissWindow(id: PipelineWindow.ID)
+                }
+            }
+            Button("Keep Editing", role: .cancel) {}
+        }
+        message:
+        {
+            Text("The pipeline has changes that are not saved. Don’t Save throws them away.")
+        }
+        .onGeometryChange(for: CGFloat.self)
+        {
+            $0.size.width
+        }
+        action:
+        {
+            WindowWidth = $0
+        }
         .sheet(item: $MergeAsked)
         {
             Request in
@@ -171,7 +232,11 @@ struct PipelineWindow: View
         .sheet(item: $EditAsked)
         {
             Request in
-            if let Selection = Pipeline.StageFor(Request.id)?.Selection
+            if let Found = Pipeline.StageFor(Request.id), Found.Kind == .Merge
+            {
+                MergeEditSheet(StageID: Request.id, Mode: Found.MergeMode, Amount: Found.MergeAmount)
+            }
+            else if let Selection = Pipeline.StageFor(Request.id)?.Selection
             {
                 StageOptionsSheet(StageID: Request.id, Selection: Selection)
             }
@@ -181,13 +246,26 @@ struct PipelineWindow: View
             Request in
             InsertFilterSheet(StageID: Request.id, After: Request.After)
         }
-        .sheet(isPresented: $ShowSavePipeline)
+        .sheet(isPresented: $ShowSavePipeline, onDismiss:
+        {
+            // Closes the window if the save that Cancel asked for was done, and stays open if the user backed out of it.
+            if CloseAfterSave && !Pipeline.HasUnsavedChanges
+            {
+                DismissWindow(id: PipelineWindow.ID)
+            }
+            CloseAfterSave = false
+        })
         {
             SavePipelineSheet()
+        }
+        .sheet(isPresented: $ShowText)
+        {
+            PipelineTextSheet()
         }
         .onAppear
         {
             Pipeline.IsOpen = true
+            Pipeline.MarkBaseline()
         }
         .onDisappear
         {
@@ -195,6 +273,40 @@ struct PipelineWindow: View
             Pipeline.IsOpen = false
             Pipeline.Reset()
         }
+    }
+
+    /// Saves the pipeline under its own name, or asks for a name if it has none, and then closes the window.
+    private func SaveThenClose()
+    {
+        if let Name = Pipeline.CurrentName
+        {
+            do
+            {
+                try Pipeline.Save(Name: Name, Directory: Pipeline.SaveFolder(Library: .Shared), Library: .Shared)
+                DismissWindow(id: PipelineWindow.ID)
+                return
+            }
+            catch
+            {
+                // The name cannot be used as it is, so the save dialog explains and lets the user choose another.
+            }
+        }
+        CloseAfterSave = true
+        ShowSavePipeline = true
+    }
+
+    /// Asks where to save the image a stage has made, as a PNG. Transparency is kept.
+    /// - Parameter Stage: The stage whose image is saved.
+    private func SaveStageImage(_ Stage: PipelineModel.Stage)
+    {
+        guard let Output = Stage.Output,
+              let Encoded = ImageUtility.ImageEncoder.PNGData(Output) else
+        {
+            return
+        }
+        ExportDocument = ImageUtility.PNGImage(Data: Encoded)
+        ExportName = "Pipeline Stage \(Stage.id)"
+        ShowExporter = true
     }
 
     /// Runs every image of the batch through the pipeline as it is now, and saves each one beside its original.

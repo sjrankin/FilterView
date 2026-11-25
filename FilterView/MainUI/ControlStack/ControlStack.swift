@@ -35,8 +35,12 @@ struct ControlStack: View
     var ImageSize: CGSize? = nil
     /// The original, unfiltered image, shown as a thumbnail in `OptionView`. `nil` if there is none.
     var SourceImage: Image? = nil
+    /// The color histogram of the original image, shown in `OptionView`. `nil` if there is none yet.
+    var SourceHistogram: ColorHistogram? = nil
     /// Height of the options box. The user changes it by dragging the divider above it.
     @State private var OptionHeight: CGFloat = 300
+    /// True once the options box has been made taller so the filter list starts 20% shorter. Done once, so the user's drags stand.
+    @State private var DidShrinkList = false
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var SizeClass
     #endif
@@ -50,8 +54,24 @@ struct ControlStack: View
                 .frame(minHeight: 100)
             PanelDivider(Size: $OptionHeight, Direction: .vertical, MinSize: 120, MaxSize: 500)
             OptionView(Selection: $Selection, SourceName: SourceName, FilterName: FilterName, RenderTime: RenderTime, ImageSize: ImageSize,
-                       SourceImage: SourceImage)
+                       SourceImage: SourceImage, SourceHistogram: SourceHistogram)
                 .frame(height: OptionHeight)
+        }
+        .onGeometryChange(for: CGFloat.self)
+        {
+            $0.size.height
+        }
+        action:
+        {
+            Total in
+            // The list gets what the options box leaves. Growing the box by a fifth of the list's height makes the list 20% shorter,
+            // leaving that room to the options and histogram.
+            if !DidShrinkList, Total > 0
+            {
+                DidShrinkList = true
+                let List = max(Total - OptionHeight, 0)
+                OptionHeight = min(OptionHeight + List * 0.2, 500)
+            }
         }
         #if os(iOS)
         // On a narrow screen this panel sits under the image and is short, so the options start small.

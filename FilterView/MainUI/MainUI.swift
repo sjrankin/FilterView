@@ -73,6 +73,12 @@ struct MainUI: View
     @State var ShowMovieExporter = false
     /// Shows the general settings dialog.
     @State var ShowSettings = false
+    /// The color histogram of the processed image. `nil` until it has been made.
+    @State var Histogram: ColorHistogram? = nil
+    /// The color histogram of the source image, or of the newest live video frame. `nil` until it has been made.
+    @State var SourceHistogram: ColorHistogram? = nil
+    /// True while a live frame's histogram is being counted, so frames that arrive meanwhile are skipped, not queued.
+    @State var SourceHistogramBusy = false
 
     /// True on a narrow screen (iPhone in portrait): the panel goes under the image instead of beside it.
     private var IsCompact: Bool
@@ -105,7 +111,8 @@ struct MainUI: View
                           OnSelectRegion: SelectRegion,
                           SourceID: SourceID,
                           OnRendered: { RenderTime = $0 },
-                          OnDropped: LoadImages)
+                          OnDropped: LoadImages,
+                          OnHistogram: { Histogram = $0 })
                     .frame(minHeight: 200)
                     // Selecting Video starts the camera; selecting anything else cancels this task, which stops it.
                     .task(id: InputSource)
@@ -145,33 +152,50 @@ struct MainUI: View
                         }
                     }
                     #endif
-                SplitControls(Setup: Split, OnChoose: ChooseSplit, OnRemove: RemoveRegions)
-                    .padding([.horizontal, .top])
-                InputControlBar(InputSource: $InputSource,
-                                MaxFPS: $MaxFPS,
-                                ShowExporter: $ShowExporter,
-                                ExportDocument: ExportDocument,
-                                OnLoad: LoadImages,
-                                BatchCount: Batch.IsActive ? Batch.Items.count : 0,
-                                CanReset: SourceName != "Built-in" || InputSource != .Image || Batch.IsActive,
-                                OnReset: ResetToBuiltInImage,
-                                OnTakePhoto: { ShowCamera = true },
-                                OnSave: PrepareExport,
-                                HasFrame: LiveImage != nil,
-                                OnSaveFrame: SaveLiveFrame,
-                                IsRecording: IsRecording,
-                                Movie: LastMovie,
-                                ShowMovieExporter: $ShowMovieExporter,
-                                OnRecord: { Task { await StartRecording() } },
-                                OnStop: StopRecording)
-                    .padding()
-                #if os(macOS)
-                PipelineControls(HasFilter: Selection != nil,
-                                 OnSet: AddToPipeline,
-                                 OnConditional: AddConditionalToPipeline,
-                                 OnSplit: AddSplitterToPipeline)
-                    .padding([.horizontal, .bottom])
-                #endif
+                // Under the image: the processed image's histogram, with the input, region and pipeline controls to the right of it.
+                HStack(alignment: .top)
+                {
+                    if InputSource == .Video || !Batch.IsActive,
+                       let Counts = Histogram
+                    {
+                        HistogramView(Histogram: Counts)
+                            // A quarter of the width of the image area.
+                            .containerRelativeFrame(.horizontal) { Width, _ in Width * 0.25 }
+                            .padding(.leading)
+                    }
+                    VStack(alignment: .leading)
+                    {
+                        InputControlBar(InputSource: $InputSource,
+                                        MaxFPS: $MaxFPS,
+                                        ShowExporter: $ShowExporter,
+                                        ExportDocument: ExportDocument,
+                                        OnLoad: LoadImages,
+                                        BatchCount: Batch.IsActive ? Batch.Items.count : 0,
+                                        CanReset: SourceName != "Built-in" || InputSource != .Image || Batch.IsActive,
+                                        OnReset: ResetToBuiltInImage,
+                                        OnTakePhoto: { ShowCamera = true },
+                                        OnSave: PrepareExport,
+                                        HasFrame: LiveImage != nil,
+                                        OnSaveFrame: SaveLiveFrame,
+                                        IsRecording: IsRecording,
+                                        Movie: LastMovie,
+                                        ShowMovieExporter: $ShowMovieExporter,
+                                        OnRecord: { Task { await StartRecording() } },
+                                        OnStop: StopRecording)
+                            .padding(.horizontal)
+                        SplitControls(Setup: Split, OnChoose: ChooseSplit, OnRemove: RemoveRegions)
+                            .padding(.horizontal)
+                        #if os(macOS)
+                        PipelineControls(HasFilter: Selection != nil,
+                                         OnSet: AddToPipeline,
+                                         OnConditional: AddConditionalToPipeline,
+                                         OnSplit: AddSplitterToPipeline)
+                            .padding(.horizontal)
+                        #endif
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, 6)
             }
             PanelDivider(Size: IsCompact ? $PanelHeight : $PanelWidth, Direction: IsCompact ? .vertical : .horizontal,
                          MinSize: 200, MaxSize: IsCompact ? 520 : 600)
@@ -194,11 +218,28 @@ struct MainUI: View
                 .padding([.horizontal, .top], 8)
                 ControlStack(FilterTreeData: FilterTreeData, Selection: $Selection, SourceName: DisplayedSourceName,
                              FilterName: Selection?.DisplayName ?? "None", RenderTime: RenderTime,
-                             ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage)
+                             ImageSize: DisplayedSize, SourceImage: DisplayedSourceImage, SourceHistogram: SourceHistogram)
             }
             .frame(width: IsCompact ? nil : PanelWidth, height: IsCompact ? PanelHeight : nil)
             // Whatever a panel's contents ask for, they stay inside the panel and do not push into the image.
             .clipped()
+        }
+        // A still source is counted when it changes. Live frames are counted as they arrive (see `RunLiveVideo`).
+        .task(id: SourceID)
+        {
+            await UpdateSourceHistogram()
+        }
+        .onChange(of: InputSource)
+        {
+            SourceHistogram = nil
+            Histogram = nil
+            if InputSource == .Image
+            {
+                Task
+                {
+                    await UpdateSourceHistogram()
+                }
+            }
         }
         .sheet(isPresented: $ShowSettings)
         {

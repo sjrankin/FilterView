@@ -277,7 +277,9 @@
                             ]
                         },
                         { "Key": "VALUE", "Title": "Value", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.5" },
-                        { "Key": "REMOVE", "Title": "Remove Other Pixels", "Type": "Toggle", "Default": "false" }
+                        { "Key": "REMOVE", "Title": "Remove Other Pixels", "Type": "Toggle", "Default": "false" },
+                        { "Key": "CLEARWHITE", "Title": "Make White In Result Transparent", "Type": "Toggle", "Default": "false" },
+                        { "Key": "WHITETOLERANCE", "Title": "White Tolerance", "Type": "Slider", "Min": 0, "Max": 1, "Step": 0.01, "Default": "0.1", "EnabledWhen": { "Key": "CLEARWHITE", "Values": ["true"] } }
                     ]
                 }
             ]

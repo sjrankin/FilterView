@@ -127,6 +127,31 @@ struct RegionalConditionalTests
         #expect(Pixel(Result, 17, 5).Alpha == 255)
     }
 
+    @Test func ClearWhiteMakesWhiteInTheResultTransparent() async throws
+    {
+        // Brightness invert of the dark left half (30) gives 225 (not white); of a black half gives white.
+        let Server = FilterServer()
+        let Filter = Server.GetFilter(RegionalConditional.FilterName)!
+        defer { withExtendedLifetime(Server) {} }
+        let Image = Source(Left: 0, Right: 220)
+        let Plain = Bytes(try await Filter.ProcessImage(Image, Options(["COMPARE": "LESS", "VALUE": "0.5"])))
+        #expect(Pixel(Plain, 2, 5) == (255, 255))
+        let Cleared = Bytes(try await Filter.ProcessImage(Image, Options(["COMPARE": "LESS", "VALUE": "0.5", "CLEARWHITE": "true"])))
+        #expect(Pixel(Cleared, 2, 5).Alpha == 0)
+        // The right half did not pass, so it keeps its own color and alpha.
+        #expect(Pixel(Cleared, 17, 5) == (220, 255))
+    }
+
+    @Test func ClearWhiteLeavesUnfilteredWhiteAlone() async throws
+    {
+        let Server = FilterServer()
+        let Filter = Server.GetFilter(RegionalConditional.FilterName)!
+        defer { withExtendedLifetime(Server) {} }
+        let Image = Source(Left: 0, Right: 255)
+        let Result = Bytes(try await Filter.ProcessImage(Image, Options(["COMPARE": "LESS", "CLEARWHITE": "true"])))
+        #expect(Pixel(Result, 17, 5) == (255, 255))
+    }
+
     @Test func ValueAboveEveryRegionChangesNothing() async throws
     {
         let Server = FilterServer()
@@ -162,6 +187,21 @@ struct RegionalConditionalTests
         {
             _ = try await Filter.ProcessImage(self.Source(Left: 30, Right: 220), ["FILTER": RegionalConditional.FilterName])
         }
+    }
+
+    @Test func OlderSavedSelectionGainsNewOptions() throws
+    {
+        // A stage saved before CLEARWHITE existed: it has only some of the parameters and options.
+        let Tree = try #require(FilterTreeLoader.CurrentParameters(Filter: RegionalConditional.FilterName, DisplayName: "Regional Conditional"))
+        let Old = Tree.filter{$0.Key != "CLEARWHITE" && $0.Key != "WHITETOLERANCE"}
+        let Saved = FilterSelection(Filter: RegionalConditional.FilterName, Options: ["VALUE": "0.7", "FILTER": "CI LineScreen"],
+                                    DisplayName: "Regional Conditional", Parameters: Old)
+        let Fresh = Saved.RefreshedFromTree()
+        #expect(Fresh.Parameters.contains{$0.Key == "CLEARWHITE"})
+        #expect(Fresh.Options?["CLEARWHITE"] == "false")
+        // What the user had chosen is kept.
+        #expect(Fresh.Options?["VALUE"] == "0.7")
+        #expect(Fresh.Options?["FILTER"] == "CI LineScreen")
     }
 
     @Test func TreeEntryNamesRealFilters() throws

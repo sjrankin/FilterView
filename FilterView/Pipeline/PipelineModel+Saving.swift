@@ -57,7 +57,12 @@ extension PipelineModel
                         Made.Filter = Selection.Filter
                         Made.DisplayName = Selection.DisplayName
                         Made.Options = Selection.Options
-                        Made.Parameters = Selection.Parameters
+                        // The filter tree describes the controls of the filters it knows, and is read again on load, so only a
+                        // filter the tree lacks keeps its own copy. This keeps files short and their options always current.
+                        if FilterTreeLoader.CurrentParameters(Filter: Selection.Filter, DisplayName: Selection.DisplayName) == nil
+                        {
+                            Made.Parameters = Selection.Parameters
+                        }
                     }
                 }
 
@@ -128,8 +133,9 @@ extension PipelineModel
         }
         else if let Name = Saved.Filter
         {
+            // The parameters saved with the stage may be out of date, so Edit Filter would lack options added since.
             Made.Selection = FilterSelection(Filter: Name, Options: Saved.Options, DisplayName: Saved.DisplayName ?? Name,
-                                             Parameters: Saved.Parameters ?? [])
+                                             Parameters: Saved.Parameters ?? []).RefreshedFromTree()
         }
         return Made
     }
@@ -165,6 +171,30 @@ extension PipelineModel
     {
         CurrentName = Name.trimmingCharacters(in: .whitespacesAndNewlines)
         CurrentURL = URL
+        MarkBaseline()
+    }
+
+    /// Remembers the pipeline as it is now as the one with no changes: when the window opens, and when a pipeline is loaded or saved.
+    func MarkBaseline()
+    {
+        Baseline = Snapshot(Name: "")
+        BaselineName = CurrentName
+        BaselineURL = CurrentURL
+    }
+
+    /// True if the pipeline is not as it was at the last `MarkBaseline`.
+    var HasUnsavedChanges: Bool
+    {
+        Snapshot(Name: "") != Baseline || CurrentName != BaselineName
+    }
+
+    /// Throws away every change since the last `MarkBaseline`.
+    func DiscardChanges() async
+    {
+        var Saved = Baseline
+        Saved.Name = BaselineName ?? ""
+        await Load(Saved, From: BaselineURL)
+        CurrentName = BaselineName
     }
 
     // MARK: Pipelines inside pipelines
@@ -220,6 +250,40 @@ extension PipelineModel
         MarkSaved(Name: Name, At: File)
     }
 
+    /// Why pipeline text that has been parsed cannot be saved as the pipeline's file, or `nil` if it can.
+    /// - Parameter Parsed: The pipeline the text describes.
+    /// - Parameter Library: The pipelines the app knows about.
+    func SaveProblem(Parsed: SavedPipeline, Library: PipelineLibrary) -> String?
+    {
+        let Replacing = CurrentName?.lowercased() == Parsed.Name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ? CurrentURL : nil
+        if let Taken = Library.Problem(forName: Parsed.Name, Directory: SaveFolder(Library: Library), Replacing: Replacing)
+        {
+            return Taken
+        }
+        if Parsed.Stages.contains(where: {$0.Nested?.Contains(Named: Parsed.Name) ?? false})
+        {
+            return "A pipeline cannot have itself as a child, and this one holds a pipeline named “\(Parsed.Name)”."
+        }
+        return nil
+    }
+
+    /// Replaces the pipeline with the one the text describes and saves it in its pipeline file, the file it came from if it has one.
+    /// Nothing is changed or written if the pipeline cannot be saved.
+    /// - Parameter Parsed: The pipeline the text describes.
+    /// - Parameter Library: The pipelines the app knows about.
+    /// - Throws: `FilterException` if the pipeline cannot be saved.
+    func ApplyAndSave(_ Parsed: SavedPipeline, Library: PipelineLibrary) async throws
+    {
+        if let Problem = SaveProblem(Parsed: Parsed, Library: Library)
+        {
+            throw FilterException(Message: Problem)
+        }
+        let Replacing = CurrentName?.lowercased() == Parsed.Name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ? CurrentURL : nil
+        let File = try Library.Save(Parsed, Directory: SaveFolder(Library: Library), Replacing: Replacing)
+        await Load(Parsed, From: File)
+        MarkBaseline()
+    }
+
     // MARK: Editing a stage's options
 
     /// Replaces the options of a filter stage and makes its image, and the images after it, again.
@@ -233,6 +297,22 @@ extension PipelineModel
             return
         }
         Stages[Where].Selection = Selection
+        Dirty.insert(ID)
+        Kick()
+    }
+
+    /// Changes how a merge stage combines its two images, and makes its image, and the images after it, again.
+    /// - Parameter ID: The merge stage.
+    /// - Parameter Mode: How the two images are combined.
+    /// - Parameter Amount: How much of the merge shows, 0.0 to 1.0.
+    func UpdateMerge(_ ID: Int, Mode: MergeModes, Amount: Double)
+    {
+        guard let Where = Stages.firstIndex(where: {$0.id == ID && $0.Kind == .Merge}) else
+        {
+            return
+        }
+        Stages[Where].MergeMode = Mode
+        Stages[Where].MergeAmount = Amount
         Dirty.insert(ID)
         Kick()
     }

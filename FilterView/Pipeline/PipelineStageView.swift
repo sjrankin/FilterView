@@ -33,12 +33,14 @@ struct StageView: View
     let OnEdit: () -> Void
     /// Called when the user chooses Insert Filter Before (false) or After (true). The window asks which filter.
     let OnInsert: (Bool) -> Void
+    /// Called when the user chooses Save Image: the window asks where to save this stage's image.
+    let OnSave: () -> Void
     @Environment(PipelineModel.self) private var Pipeline
 
     /// True if the stage's filter has options to edit.
     private var CanEdit: Bool
     {
-        Stage.Kind == .Filter && !(Stage.Selection?.Parameters.isEmpty ?? true)
+        Stage.Kind == .Merge || (Stage.Kind == .Filter && !(Stage.Selection?.Parameters.isEmpty ?? true))
     }
 
     var body: some View
@@ -97,12 +99,15 @@ struct StageView: View
             {
                 if CanEdit
                 {
-                    Button("Edit Filter", systemImage: "slider.horizontal.3")
+                    Button(Stage.Kind == .Merge ? "Edit Merge" : "Edit Filter", systemImage: "slider.horizontal.3")
                     {
                         OnEdit()
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
+                    // Without this the button turns gray, and is hard to see, when the window does not have focus.
+                    .environment(\.controlActiveState, .key)
+                    .shadow(radius: 2)
                     .padding(6)
                 }
             }
@@ -224,9 +229,14 @@ struct StageView: View
             OnMerge()
         }
         .disabled(Pipeline.MergeTargets(for: Stage.id).isEmpty)
+        Button("Save Image…", systemImage: "square.and.arrow.down")
+        {
+            OnSave()
+        }
+        .disabled(Stage.Output == nil)
         if CanEdit
         {
-            Button("Edit Filter…")
+            Button(Stage.Kind == .Merge ? "Edit Merge…" : "Edit Filter…")
             {
                 OnEdit()
             }

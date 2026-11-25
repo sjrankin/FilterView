@@ -41,6 +41,8 @@ struct ImagePane: View
     var OnRendered: (Duration?) -> Void
     /// Called when image files are dropped on the image (macOS only). Several make a batch.
     var OnDropped: ([URL]) -> Void
+    /// Called with the color histogram of the processed image, each time it changes.
+    var OnHistogram: ((ColorHistogram?) -> Void)? = nil
     @Environment(BatchModel.self) private var Batch
     @State private var IsDropTargeted = false
 
@@ -51,6 +53,8 @@ struct ImagePane: View
             if InputSource == .Video
             {
                 // Live video. Frames are filtered as they arrive (see `RunLiveVideo`), so this just shows them.
+                ZoomableContainer
+                {
                 (LiveImage ?? Image(systemName: "video"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -75,6 +79,7 @@ struct ImagePane: View
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.black)
+                }
             }
             else
             {
@@ -91,13 +96,17 @@ struct ImagePane: View
                     }
                     else
                     {
-                        ImageView(DisplayImage: SourceImage,
-                                  Server: Server,
-                                  Selection: Selection,
-                                  Split: Split,
-                                  OnSelectRegion: OnSelectRegion,
-                                  SourceID: SourceID,
-                                  OnRendered: OnRendered)
+                        ZoomableContainer
+                        {
+                            ImageView(DisplayImage: SourceImage,
+                                      Server: Server,
+                                      Selection: Selection,
+                                      Split: Split,
+                                      OnSelectRegion: OnSelectRegion,
+                                      SourceID: SourceID,
+                                      OnRendered: OnRendered,
+                                      OnHistogram: OnHistogram)
+                        }
                     }
                 }
                 #if os(macOS)

@@ -52,6 +52,10 @@ final class PipelineModel
     var CurrentName: String? = nil
     /// The file the pipeline was loaded from or last saved to. Saving over it is allowed; saving over any other file is not.
     var CurrentURL: URL? = nil
+    /// The pipeline as it was when the window opened or it was last loaded or saved, which Cancel goes back to. See `MarkBaseline`.
+    var Baseline = SavedPipeline(Name: "", Stages: [], FinalStage: 0)
+    var BaselineName: String? = nil
+    var BaselineURL: URL? = nil
     /// Something the user needs to be told, such as why a pipeline could not be added. Shown in the main window.
     var Problem: String? = nil
 }

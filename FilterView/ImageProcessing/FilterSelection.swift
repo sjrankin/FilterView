@@ -64,4 +64,22 @@ struct FilterSelection: Hashable, Sendable
         Changed[Key] = Value
         return FilterSelection(Filter: Filter, Options: Changed, DisplayName: DisplayName, Parameters: Parameters)
     }
+
+    /// This selection with the options the filter tree offers now. Options the selection already has keep their values; options it lacks
+    /// (added to the filter after it was saved) get their defaults. A selection the tree does not know is returned as it is.
+    func RefreshedFromTree() -> FilterSelection
+    {
+        guard !IsPipeline,
+              let Current = FilterTreeLoader.CurrentParameters(Filter: Filter, DisplayName: DisplayName),
+              Current != Parameters else
+        {
+            return self
+        }
+        var Merged = Options ?? [:]
+        for Parameter in Current where Merged[Parameter.Key] == nil
+        {
+            Merged[Parameter.Key] = Parameter.Default
+        }
+        return FilterSelection(Filter: Filter, Options: Merged, DisplayName: DisplayName, Parameters: Current)
+    }
 }

@@ -88,4 +88,19 @@ enum FilterTreeLoader
     {
         Root.Leaves().compactMap{$0.Filter}.filter{Server.GetFilter($0) == nil}
     }
+
+    /// The filter tree in the app bundle, loaded once.
+    static let Current: FilterNode? = try? Load(Resource: "FilterTree")
+
+    /// The options the tree now offers for a filter. A pipeline saved earlier keeps the list it was saved with, so this is how it learns of
+    /// options added since.
+    /// - Parameter Filter: The registered name of the filter.
+    /// - Parameter DisplayName: The label of the tree entry. Entries that share a filter are told apart by it.
+    /// - Returns: The parameters, or `nil` if the tree has no single matching entry with parameters.
+    static func CurrentParameters(Filter: String, DisplayName: String) -> [FilterParameter]?
+    {
+        let Entries = (Current?.Leaves() ?? []).filter{$0.Filter == Filter}
+        let Match = Entries.first{$0.Name == DisplayName} ?? (Entries.count == 1 ? Entries.first : nil)
+        return Match?.Parameters
+    }
 }
